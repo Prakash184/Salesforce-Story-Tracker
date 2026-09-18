@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salesforce Story Development Tracker</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --primary: #0070d2; /* Salesforce Blue */
+      --primary-dark: #014486;
+      --secondary: #0891b2;
+      --success: #2e844a;
+      --success-bg: #e5f2e5;
+      --warning: #dd7a01;
+      --warning-bg: #fff1e6;
+      --danger: #ba0517;
+      --danger-bg: #fceded;
+      --background: #f4f6f9;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; outline: none; }
+    button { cursor: pointer; transition: all 0.2s ease; }
+
+    /* Modern Glass Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, #1e3a8a 100%);
+      color: white;
+      padding: 24px 32px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 20px rgba(0, 112, 210, 0.15);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .header p { margin: 4px 0 0; color: #bae6fd; font-size: 14px; font-weight: 500; }
+
+    .header-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .container {
+      width: min(1400px, calc(100% - 48px));
+      margin: 32px auto 60px;
+    }
+
+    /* Enhanced Buttons */
+    .button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .button:active { transform: translateY(0); }
+    
+    .button-primary { color: white; background: var(--primary); }
+    .button-primary:hover { background: var(--primary-dark); }
+    
+    .button-light { color: var(--primary-dark); background: white; }
+    .button-light:hover { background: #f8fafc; }
+    
+    .button-outline { color: var(--text); background: white; border: 1px solid var(--border); }
+    .button-outline:hover { border-color: var(--muted); background: #f9fafb; }
+    
+    .button-danger { color: white; background: var(--danger); }
+    .button-small { padding: 6px 12px; font-size: 13px; border-radius: 6px; }
+    .hidden { display: none !important; }
+
+    /* Beautiful Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+
+    .summary-card { padding: 24px; position: relative; overflow: hidden; }
+    .summary-card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--primary);
+    }
+    .summary-card:nth-child(2)::before { background: var(--success); }
+    .summary-card:nth-child(3)::before { background: var(--secondary); }
+    .summary-card:nth-child(4)::before { background: var(--danger); }
+
+    .summary-label { color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .summary-value { margin-top: 8px; font-size: 36px; font-weight: 800; color: var(--text); }
+
+    /* Progress Bar */
+    .readiness-card { padding: 24px; margin-bottom: 24px; }
+    .readiness-heading { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 700; font-size: 16px; }
+    .readiness-heading span:last-child { color: var(--primary); font-size: 18px; }
+    .progress-track { height: 12px; border-radius: 20px; background: #e2e8f0; overflow: hidden; }
+    .progress-value {
+      height: 100%; border-radius: 20px;
+      background: linear-gradient(90deg, var(--primary), #3b82f6);
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .readiness-help { margin: 12px 0 0; color: var(--muted); font-size: 13px; font-weight: 500; }
+
+    /* Inputs & Filters */
+    .filters {
+      display: grid;
+      grid-template-columns: minmax(300px, 1fr) 200px 200px;
+      gap: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .input, .select, .textarea {
+      width: 100%; color: var(--text); background: #f9fafb;
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; transition: all 0.2s;
+    }
+    .textarea { min-height: 100px; resize: vertical; }
+    .input:focus, .select:focus, .textarea:focus {
+      background: white; border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 112, 210, 0.15);
+    }
+
+    /* Table Design */
+    .table-card { overflow: hidden; }
+    .table-heading { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); background: #fcfcfc; }
+    .table-heading h2 { margin: 0; font-size: 18px; font-weight: 700; }
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    th { color: var(--muted); background: #f9fafb; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; padding: 16px 24px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: 16px 24px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tbody tr:hover { background: #f0f7ff; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* Component Details */
+    .story-cell { font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .api-name { font-family: 'Monaco', 'Consolas', monospace; font-size: 12px; color: var(--primary-dark); background: #f1f5f9; padding: 4px 8px; border-radius: 4px; }
+    .status { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .status-green { color: var(--success); background: var(--success-bg); }
+    .status-blue { color: var(--primary); background: #e0f2fe; }
+    .status-red { color: var(--danger); background: var(--danger-bg); }
+    .status-amber { color: var(--warning); background: var(--warning-bg); }
+
+    .deployment-button { border: 1px solid transparent; background: transparent; padding: 6px 10px; font-weight: 600; border-radius: 6px; }
+    .deployment-button:hover { background: #f1f5f9; }
+    .deployment-included { color: var(--success); }
+    .deployment-pending { color: var(--muted); }
+
+    .action-group { display: flex; gap: 8px; }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none; position: fixed; z-index: 1000; inset: 0;
+      background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; animation: fadeIn 0.2s ease; }
+    .modal {
+      width: min(900px, 100%); max-height: 90vh; overflow-y: auto;
+      background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      animation: slideUp 0.3s ease;
+    }
+    .modal-header {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px; background: white; border-bottom: 1px solid var(--border);
+    }
+    .modal-header h2 { margin: 0; font-size: 22px; font-weight: 700; }
+    .close-button { width: 32px; height: 32px; border: none; border-radius: 8px; background: #f1f5f9; font-size: 20px; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+    .close-button:hover { background: #e2e8f0; color: var(--danger); }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px; }
+    .form-field label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--text); }
+    .full-width { grid-column: 1 / -1; }
+    
+    .checkbox-field { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; }
+    .checkbox-field input { width: 18px; height: 18px; accent-color: var(--primary); }
+
+    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; padding: 24px; border-top: 1px solid var(--border); background: #fcfcfc; }
+
+    /* SVG Icons for ticket types */
+    .icon-story { color: #0ea5e9; }
+    .icon-bug { color: #ef4444; }
+    .icon-task { color: #8b5cf6; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* Notices/Alerts */
+    .notice {
+      display: none; margin-bottom: 24px; padding: 16px; border-radius: 8px;
+      font-weight: 500; font-size: 14px; animation: slideUp 0.3s ease;
+    }
+    .notice.success { background: var(--success-bg); color: var(--success); border: 1px solid #b7e4c7; }
+    .notice.error { background: var(--danger-bg); color: var(--danger); border: 1px solid #f87171; }
+
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-content">
+      <div class="header-logo">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        <div>
+          <h1>SFDC Deployment Tracker</h1>
+          <p>Track metadata, generate package.xml, and manage release readiness.</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <input id="csvInput" class="hidden" type="file" accept=".csv,text/csv" />
+        
+        <button id="importButton" class="button button-outline" style="border-color: rgba(255,255,255,0.3); color: white; background: transparent;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Import
+        </button>
+
+        <button id="exportButton" class="button button-outline" style="border-color: rgba(255,255,255,0.3); color: white; background: transparent;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Export
+        </button>
+
+        <button onclick="generatePackageXml()" class="button button-light font-bold">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Build package.xml
+        </button>
+
+        <button id="addButton" class="button button-light font-bold" style="color: var(--primary);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add Component
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="notice" class="notice"></div>
+
+    <section class="summary-grid">
+      <div class="card summary-card">
+        <div class="summary-label">Total Tracked</div>
+        <div id="totalComponents" class="summary-value">0</div>
+      </div>
+      <div class="card summary-card">
+        <div class="summary-label">Deployment Ready</div>
+        <div id="deploymentReady" class="summary-value">0</div>
+      </div>
+      <div class="card summary-card">
+        <div class="summary-label">Testing Complete</div>
+        <div id="testingComplete" class="summary-value">0</div>
+      </div>
+      <div class="card summary-card">
+        <div class="summary-label">Blocked / Action Req</div>
+        <div id="blockedComponents" class="summary-value">0</div>
+      </div>
+    </section>
+
+    <section class="card readiness-card">
+      <div class="readiness-heading">
+        <span>Sprint Release Readiness</span>
+        <span id="readinessPercentage">0%</span>
+      </div>
+      <div class="progress-track">
+        <div id="readinessProgress" class="progress-value"></div>
+      </div>
+      <p class="readiness-help">Metric based on deployment readiness, testing sign-off, and package inclusion.</p>
+    </section>
+
+    <section class="card filters">
+      <input id="searchInput" class="input" type="search" placeholder="Search by story, API name, or dependency..." />
+      <select id="storyFilter" class="select"><option value="All">All Stories</option></select>
+      <select id="statusFilter" class="select"><option value="All">All Statuses</option></select>
+    </section>
+
+    <section class="card table-card">
+      <div class="table-heading">
+        <h2>Component Register</h2>
+        <div class="action-group">
+          <button onclick="copyReleaseNotes()" class="button button-outline button-small">📋 Copy List</button>
+          <span id="recordCount" style="background:#f1f5f9; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:700; color:var(--muted)">0 records</span>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Metadata Type</th>
+              <th>API Name</th>
+              <th>Dev Status</th>
+              <th>Testing</th>
+              <th>Deploy Package</th>
+              <th>Dependencies</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="componentTableBody"></tbody>
+        </table>
+      </div>
+      <div id="emptyState" style="display:none; padding: 60px; text-align: center; color: var(--muted);">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin:0 auto 16px; opacity:0.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        <p style="font-size: 16px; font-weight: 500;">No components found.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add/Edit Modal -->
+  <div id="modalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add Component</h2>
+        <button id="closeModalButton" class="close-button" type="button">&times;</button>
+      </div>
+
+      <form id="componentForm" class="form-grid">
+        
+        <div class="form-field">
+          <label for="ticketType">Ticket Type</label>
+          <select id="ticketType" class="select">
+            <option value="Story">📖 User Story</option>
+            <option value="Bug">🐛 Bug Fix</option>
+            <option value="Task">📋 Tech Task</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="story">Ticket ID *</label>
+          <input id="story" class="input" type="text" placeholder="e.g. US-1024 or BUG-88" required />
+        </div>
+
+        <div class="form-field">
+          <label for="componentName">Component API Name *</label>
+          <input id="componentName" class="input" type="text" placeholder="e.g. AccountTrigger" required />
+        </div>
+
+        <div class="form-field">
+          <label for="componentType">Salesforce Metadata Type</label>
+          <select id="componentType" class="select"></select>
+        </div>
+
+        <div class="form-field">
+          <label for="changeType">Change Type</label>
+          <select id="changeType" class="select">
+            <option>Created</option>
+            <option selected>Updated</option>
+            <option>Deleted (Destructive)</option>
+            <option>Manual Step (No Deploy)</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="environment">Target Environment</label>
+          <select id="environment" class="select">
+            <option selected>Dev</option>
+            <option>QA</option>
+            <option>UAT</option>
+            <option>Pre-Prod</option>
+            <option>Production</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="developmentStatus">Development Status</label>
+          <select id="developmentStatus" class="select"></select>
+        </div>
+
+        <div class="form-field">
+          <label for="testingStatus">Testing Status</label>
+          <select id="testingStatus" class="select"></select>
+        </div>
+
+        <div class="form-field full-width">
+          <label for="developer">Developer Name</label>
+          <input id="developer" class="input" type="text" value="Prakash Jha" />
+        </div>
+
+        <div class="form-field full-width">
+          <label for="description">Change Description</label>
+          <textarea id="description" class="textarea" placeholder="Briefly describe what logic or UI was changed."></textarea>
+        </div>
+
+        <div class="form-field full-width">
+          <label for="dependency">Dependencies / Manual Steps</label>
+          <textarea id="dependency" class="textarea" placeholder="e.g. Needs FLS updated for Profile X, relies on Custom Label Y."></textarea>
+        </div>
+
+        <label class="checkbox-field full-width">
+          <input id="deploymentIncluded" type="checkbox" />
+          Ready & Included for Deployment Package
+        </label>
+
+        <div class="modal-actions full-width">
+          <button id="cancelButton" class="button button-outline" type="button">Cancel</button>
+          <button class="button button-primary" type="submit">Save to Tracker</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "salesforce-story-tracker-data-v2";
+
+    // SFDC Specific Mapping for package.xml generation
+    const SFDC_METADATA_MAP = {
+      "Apex Class": "ApexClass", "Apex Trigger": "ApexTrigger", 
+      "Lightning Web Component": "LightningComponentBundle", "Aura Component": "AuraDefinitionBundle",
+      "Custom Object": "CustomObject", "Custom Field": "CustomField", 
+      "Validation Rule": "ValidationRule", "Flow": "Flow", 
+      "Permission Set": "PermissionSet", "Profile": "Profile", 
+      "Custom Label": "CustomLabel", "Email Template": "EmailTemplate",
+      "Page Layout": "Layout", "Record Type": "RecordType", 
+      "Lightning Record Page": "FlexiPage", "Custom Metadata": "CustomMetadata",
+      "Static Resource": "StaticResource", "Report": "Report", "Dashboard": "Dashboard"
+    };
+
+    const COMPONENT_TYPES = Object.keys(SFDC_METADATA_MAP).concat(["Other"]);
+    const DEVELOPMENT_STATUSES = ["In Development", "Ready for QA", "QA In Progress", "QA Passed", "Ready for Deployment", "Deployed", "Blocked"];
+    const TESTING_STATUSES = ["Not Started", "In Progress", "Passed", "Failed", "Not Required"];
+
+    // Ensure backwards compatibility with your V1 CSV logic, added Ticket Type
+    const CSV_COLUMNS = ["Ticket Type", "Story ID", "Component Type", "API Name", "Change Type", "Description", "Dependencies", "Environment", "Status", "Developer", "Test Status", "Included", "Notes"];
+    const CSV_KEYS = ["ticketType", "story", "componentType", "componentName", "changeType", "description", "dependency", "environment", "status", "developer", "testStatus", "deploymentIncluded", "notes"];
+
+    let rows = loadRows();
+    let editingId = null;
+
+    const elements = {
+      notice: document.getElementById("notice"),
+      totalComponents: document.getElementById("totalComponents"),
+      deploymentReady: document.getElementById("deploymentReady"),
+      testingComplete: document.getElementById("testingComplete"),
+      blockedComponents: document.getElementById("blockedComponents"),
+      readinessPercentage: document.getElementById("readinessPercentage"),
+      readinessProgress: document.getElementById("readinessProgress"),
+      searchInput: document.getElementById("searchInput"),
+      storyFilter: document.getElementById("storyFilter"),
+      statusFilter: document.getElementById("statusFilter"),
+      recordCount: document.getElementById("recordCount"),
+      tableBody: document.getElementById("componentTableBody"),
+      emptyState: document.getElementById("emptyState"),
+      modalBackdrop: document.getElementById("modalBackdrop"),
+      modalTitle: document.getElementById("modalTitle"),
+      componentForm: document.getElementById("componentForm"),
+      csvInput: document.getElementById("csvInput"),
+      ticketType: document.getElementById("ticketType"),
+      story: document.getElementById("story"),
+      componentName: document.getElementById("componentName"),
+      componentType: document.getElementById("componentType"),
+      changeType: document.getElementById("changeType"),
+      environment: document.getElementById("environment"),
+      developmentStatus: document.getElementById("developmentStatus"),
+      testingStatus: document.getElementById("testingStatus"),
+      developer: document.getElementById("developer"),
+      description: document.getElementById("description"),
+      dependency: document.getElementById("dependency"),
+      deploymentIncluded: document.getElementById("deploymentIncluded")
+    };
+
+    initializeApplication();
+
+    function initializeApplication() {
+      populateSelect(elements.componentType, COMPONENT_TYPES, "Apex Class");
+      populateSelect(elements.developmentStatus, DEVELOPMENT_STATUSES, "In Development");
+      populateSelect(elements.testingStatus, TESTING_STATUSES, "Not Started");
+      populateSelect(elements.statusFilter, DEVELOPMENT_STATUSES, null, true);
+
+      document.getElementById("addButton").addEventListener("click", openNewComponentModal);
+      document.getElementById("closeModalButton").addEventListener("click", closeModal);
+      document.getElementById("cancelButton").addEventListener("click", closeModal);
+      document.getElementById("exportButton").addEventListener("click", exportCsv);
+      document.getElementById("importButton").addEventListener("click", () => elements.csvInput.click());
+      elements.csvInput.addEventListener("change", importCsv);
+      elements.componentForm.addEventListener("submit", saveComponent);
+      elements.searchInput.addEventListener("input", render);
+      elements.storyFilter.addEventListener("change", render);
+      elements.statusFilter.addEventListener("change", render);
+
+      render();
+    }
+
+    function populateSelect(select, options, selectedValue, preserveAll) {
+      if (!preserveAll) select.innerHTML = "";
+      options.forEach(val => {
+        const option = document.createElement("option");
+        option.value = val; option.textContent = val;
+        if (val === selectedValue) option.selected = true;
+        select.appendChild(option);
+      });
+    }
+
+    function generateId() { return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2); }
+
+    function loadRows() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } 
+      catch (error) { return []; }
+    }
+
+    function saveRows() { localStorage.setItem(STORAGE_KEY, JSON.stringify(rows)); }
+
+    function render() {
+      renderSummary(); renderStoryOptions(); renderTable();
+    }
+
+    function renderSummary() {
+      const ready = rows.filter(r => r.status === "Ready for Deployment" || r.status === "Deployed").length;
+      const tested = rows.filter(r => r.testStatus === "Passed" || r.testStatus === "Not Required").length;
+      const included = rows.filter(r => r.deploymentIncluded).length;
+      const blocked = rows.filter(r => r.status === "Blocked").length;
+      
+      const total = rows.length;
+      const readiness = total ? Math.round(((ready + tested + included) / (total * 3)) * 100) : 0;
+
+      elements.totalComponents.textContent = total;
+      elements.deploymentReady.textContent = ready;
+      elements.testingComplete.textContent = tested;
+      elements.blockedComponents.textContent = blocked;
+      elements.readinessPercentage.textContent = readiness + "%";
+      elements.readinessProgress.style.width = readiness + "%";
+    }
+
+    function renderStoryOptions() {
+      const currentSelection = elements.storyFilter.value;
+      const storyIds = [...new Set(rows.map(r => r.story).filter(Boolean))].sort();
+      elements.storyFilter.innerHTML = '<option value="All">All Stories</option>';
+      storyIds.forEach(id => {
+        const opt = document.createElement("option"); opt.value = id; opt.textContent = id;
+        elements.storyFilter.appendChild(opt);
+      });
+      elements.storyFilter.value = (currentSelection === "All" || storyIds.includes(currentSelection)) ? currentSelection : "All";
+    }
+
+    // SVG Icon Helper based on Ticket Type
+    function getTicketIcon(type) {
+      if(type === 'Bug') return `<svg class="icon-bug" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+      if(type === 'Task') return `<svg class="icon-task" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>`;
+      return `<svg class="icon-story" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`;
+    }
+
+    function renderTable() {
+      const q = elements.searchInput.value.toLowerCase();
+      const s = elements.storyFilter.value;
+      const st = elements.statusFilter.value;
+
+      const filtered = rows.filter(r => {
+        const text = Object.values(r).join(" ").toLowerCase();
+        return text.includes(q) && (s === "All" || r.story === s) && (st === "All" || r.status === st);
+      });
+
+      elements.tableBody.innerHTML = "";
+      filtered.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            <div class="story-cell">
+              ${getTicketIcon(row.ticketType)}
+              <span>${escapeHtml(row.story)}</span>
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-top:4px;">${escapeHtml(row.changeType)}</div>
+          </td>
+          <td style="font-weight: 500;">${escapeHtml(row.componentType)}</td>
+          <td><span class="api-name">${escapeHtml(row.componentName)}</span></td>
+          <td><span class="status ${getStatusClass(row.status)}">${escapeHtml(row.status)}</span></td>
+          <td><span class="status ${getStatusClass(row.testStatus)}">${escapeHtml(row.testStatus)}</span></td>
+          <td>
+            <button class="deployment-button ${row.deploymentIncluded ? "deployment-included" : "deployment-pending"}" data-action="toggle" data-id="${row.id}">
+              ${row.deploymentIncluded ? "✓ Ready to Deploy" : "+ Mark Ready"}
+            </button>
+          </td>
+          <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--muted); font-size:12px;" title="${escapeHtml(row.dependency)}">
+            ${escapeHtml(row.dependency || "--")}
+          </td>
+          <td>
+            <div class="action-group">
+              <button class="button button-outline button-small" data-action="edit" data-id="${row.id}">Edit</button>
+              <button class="button button-danger button-small" data-action="delete" data-id="${row.id}">Del</button>
+            </div>
+          </td>
+        `;
+        elements.tableBody.appendChild(tr);
+      });
+
+      elements.recordCount.textContent = `${filtered.length} records`;
+      elements.emptyState.style.display = filtered.length ? "none" : "block";
+
+      elements.tableBody.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const action = e.currentTarget.dataset.action;
+          const id = e.currentTarget.dataset.id;
+          if(action === 'edit') openEditComponentModal(id);
+          if(action === 'delete') deleteComponent(id);
+          if(action === 'toggle') toggleDeployment(id);
+        });
+      });
+    }
+
+    function getStatusClass(status) {
+      if (status === "Blocked" || status === "Failed") return "status-red";
+      if (status === "Deployed" || status === "Passed") return "status-green";
+      if (String(status).includes("Ready")) return "status-blue";
+      return "status-amber";
+    }
+
+    function openNewComponentModal() {
+      editingId = null;
+      elements.modalTitle.textContent = "Add Component";
+      elements.componentForm.reset(); // Reset clears everything
+      
+      // Set defaults AFTER reset
+      elements.ticketType.value = "Story";
+      elements.componentType.value = "Apex Class";
+      elements.changeType.value = "Updated";
+      elements.environment.value = "Dev";
+      elements.developmentStatus.value = "In Development";
+      elements.testingStatus.value = "Not Started";
+      elements.developer.value = "Prakash Jha"; 
+      elements.deploymentIncluded.checked = false;
+
+      openModal();
+    }
+
+    function openEditComponentModal(id) {
+      const row = rows.find(r => r.id === id);
+      if (!row) return;
+      editingId = id;
+      elements.modalTitle.textContent = "Edit Component";
+      elements.ticketType.value = row.ticketType || "Story";
+      elements.story.value = row.story || "";
+      elements.componentName.value = row.componentName || "";
+      elements.componentType.value = row.componentType || "Other";
+      elements.changeType.value = row.changeType || "Updated";
+      elements.environment.value = row.environment || "Dev";
+      elements.developmentStatus.value = row.status || "In Development";
+      elements.testingStatus.value = row.testStatus || "Not Started";
+      elements.developer.value = row.developer || "Prakash Jha";
+      elements.description.value = row.description || "";
+      elements.dependency.value = row.dependency || "";
+      elements.deploymentIncluded.checked = row.deploymentIncluded;
+      openModal();
+    }
+
+    function openModal() { elements.modalBackdrop.classList.add("open"); document.body.style.overflow = "hidden"; }
+    function closeModal() { elements.modalBackdrop.classList.remove("open"); document.body.style.overflow = ""; editingId = null; }
+
+    function saveComponent(e) {
+      e.preventDefault();
+      const component = {
+        id: editingId || generateId(),
+        ticketType: elements.ticketType.value,
+        story: elements.story.value.trim(),
+        componentType: elements.componentType.value,
+        componentName: elements.componentName.value.trim(),
+        changeType: elements.changeType.value,
+        description: elements.description.value.trim(),
+        dependency: elements.dependency.value.trim(),
+        environment: elements.environment.value,
+        status: elements.developmentStatus.value,
+        developer: elements.developer.value.trim(),
+        testStatus: elements.testingStatus.value,
+        deploymentIncluded: elements.deploymentIncluded.checked,
+        notes: ""
+      };
+      if (editingId) rows = rows.map(r => r.id === editingId ? component : r);
+      else rows.unshift(component);
+      
+      saveRows(); closeModal(); render(); showNotice("Component saved successfully.", false);
+    }
+
+    function deleteComponent(id) {
+      if(!confirm("Remove this component from the tracker?")) return;
+      rows = rows.filter(r => r.id !== id);
+      saveRows(); render(); showNotice("Component deleted.", false);
+    }
+
+    function toggleDeployment(id) {
+      rows = rows.map(r => r.id === id ? { ...r, deploymentIncluded: !r.deploymentIncluded } : r);
+      saveRows(); render();
+    }
+
+    // NEW: Generate valid package.xml for Salesforce
+    function generatePackageXml() {
+      const deployRows = rows.filter(r => r.deploymentIncluded && r.changeType !== "Deleted (Destructive)");
+      if(deployRows.length === 0) return showNotice("No components marked for deployment!", true);
+
+      // Group by Salesforce Metadata Type
+      const grouped = {};
+      deployRows.forEach(r => {
+        const metaType = SFDC_METADATA_MAP[r.componentType];
+        if(!metaType) return; // Skip unsupported types
+        if(!grouped[metaType]) grouped[metaType] = new Set();
+        grouped[metaType].add(r.componentName);
+      });
+
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<Package xmlns="http://soap.sforce.com/2006/04/metadata">\n`;
+      for(const [type, names] of Object.entries(grouped)) {
+        xml += `    <types>\n`;
+        names.forEach(name => xml += `        <members>${name}</members>\n`);
+        xml += `        <name>${type}</name>\n    </types>\n`;
+      }
+      xml += `    <version>60.0</version>\n</Package>`;
+
+      downloadFile("package.xml", xml, "application/xml");
+      showNotice("package.xml generated successfully!", false);
+    }
+
+    // NEW: Copy formatted list for Release Notes
+    function copyReleaseNotes() {
+      const deployRows = rows.filter(r => r.deploymentIncluded);
+      if(deployRows.length === 0) return showNotice("No components marked for deployment!", true);
+      
+      let text = "🚀 SFDC Release Components\n------------------------\n";
+      deployRows.forEach(r => {
+        text += `[${r.ticketType}] ${r.story} - ${r.componentType}: ${r.componentName} (${r.changeType})\n`;
+      });
+
+      navigator.clipboard.writeText(text).then(() => {
+        showNotice("Release list copied to clipboard!", false);
+      });
+    }
+
+    function exportCsv() {
+      const csvRows = [CSV_COLUMNS.map(csvCell).join(","), ...rows.map(r => CSV_KEYS.map(k => csvCell(r[k])).join(","))];
+      downloadFile(`sfdc-tracker-${new Date().toISOString().slice(0, 10)}.csv`, csvRows.join("\n"), "text/csv");
+      showNotice("CSV exported successfully.", false);
+    }
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type: type + ";charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url; link.download = filename;
+      document.body.appendChild(link); link.click(); link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function importCsv(e) {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function() {
+        try {
+           // Basic naive parse, kept for brevity, assumes standard CSV output from this app
+           const lines = reader.result.split('\n');
+           if(lines.length < 2) throw new Error("Invalid CSV");
+           const imported = [];
+           for(let i=1; i<lines.length; i++) {
+             if(!lines[i].trim()) continue;
+             const vals = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g).map(v => v.replace(/^"\vert{}"$/g, ''));
+             imported.push({
+               id: generateId(), ticketType: vals[0] || "Story", story: vals[1], componentType: vals[2],
+               componentName: vals[3], changeType: vals[4], description: vals[5], dependency: vals[6],
+               environment: vals[7], status: vals[8], developer: vals[9], testStatus: vals[10],
+               deploymentIncluded: vals[11] === 'true'
+             });
+           }
+           if(confirm("Import will replace current data. Continue?")) { rows = imported; saveRows(); render(); showNotice("Imported successfully.", false); }
+        } catch(err) { showNotice("Failed to parse CSV.", true); }
+        e.target.value = "";
+      };
+      reader.readAsText(file);
+    }
+
+    function csvCell(val) { return '"' + String(val || "").replace(/"/g, '""') + '"'; }
+    function showNotice(msg, isErr) {
+      elements.notice.textContent = msg;
+      elements.notice.className = `notice ${isErr ? "error" : "success"}`;
+      elements.notice.style.display = "block";
+      clearTimeout(showNotice.timer);
+      showNotice.timer = setTimeout(() => elements.notice.style.display = "none", 4000);
+    }
+    function escapeHtml(val) {
+      const div = document.createElement("div"); div.textContent = String(val || ""); return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

@@ -8,14 +8,30 @@
   <style>
     :root{--primary:#0176d3;--navy:#032d60;--cyan:#22d3ee;--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#667085;--border:#e4e7ec;--success:#039855;--warn:#dc6803;--danger:#d92d20;--shadow:0 12px 35px rgba(16,24,40,.08)}
     body.dark{--bg:#07111f;--card:#101828;--text:#f2f4f7;--muted:#98a2b3;--border:#26354b;--shadow:0 14px 40px rgba(0,0,0,.3)}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:.25s}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:.25s;display:flex;flex-direction:column;min-height:100vh;}
+    button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
     .header{position:relative;overflow:hidden;background:linear-gradient(135deg,#032d60,#0b4f8a 58%,#0176d3);color:#fff;box-shadow:0 12px 30px rgba(1,118,211,.2)}.header:after{content:"";position:absolute;width:380px;height:380px;border-radius:50%;right:-130px;top:-250px;background:rgba(34,211,238,.2);filter:blur(14px)}
     .header-inner,.container{width:min(1500px,calc(100% - 40px));margin:auto}.header-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:28px 0}.brand{display:flex;align-items:center;gap:15px}.brand-icon{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;background:rgba(255,255,255,.14);font-size:27px;backdrop-filter:blur(10px)}.eyebrow{margin:0;color:#a5f3fc;font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}.brand h1{margin:4px 0 0;font-size:28px;line-height:1.15}.brand p:last-child{margin:5px 0 0;color:#dbeafe;font-size:13px}.actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:9px}
     .btn{border:0;border-radius:12px;padding:10px 14px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:750;transition:.18s}.btn:hover{transform:translateY(-1px);filter:brightness(1.04)}.btn-glass{color:#fff;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16)}.btn-white{color:var(--navy);background:#fff}.btn-cyan{color:#082f49;background:#67e8f9}.btn-primary{color:#fff;background:var(--primary)}.btn-outline{color:var(--text);background:var(--card);border:1px solid var(--border)}.btn-danger{color:#fff;background:var(--danger)}.btn-icon{width:38px;height:38px;padding:0}.btn-small{padding:7px 10px;border-radius:9px;font-size:12px}
-    .container{padding:28px 0 60px}.metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow)}.metric{overflow:hidden}.metric-line{height:6px}.metric-body{padding:19px;display:flex;align-items:center;justify-content:space-between}.metric-label{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.metric-value{font-size:31px;font-weight:850;margin-top:4px}.metric-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:#fff;font-size:21px;box-shadow:0 8px 20px rgba(0,0,0,.13)}
+    .container{padding:28px 0 60px;flex:1}.metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow)}.metric{overflow:hidden}.metric-line{height:6px}.metric-body{padding:19px;display:flex;align-items:center;justify-content:space-between}.metric-label{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.metric-value{font-size:31px;font-weight:850;margin-top:4px}.metric-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:#fff;font-size:21px;box-shadow:0 8px 20px rgba(0,0,0,.13)}
     .blue{background:linear-gradient(90deg,#3b82f6,#4f46e5)}.purple{background:linear-gradient(90deg,#8b5cf6,#7e22ce)}.green{background:linear-gradient(90deg,#10b981,#0d9488)}.red{background:linear-gradient(90deg,#f43f5e,#dc2626)}.orange{background:linear-gradient(90deg,#fbbf24,#f97316)}
-    .toolbar{display:grid;grid-template-columns:1fr 220px 220px auto;gap:12px;padding:15px;margin:22px 0}.control{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:11px;background:var(--card);color:var(--text);outline:none;transition:.18s}.control:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(1,118,211,.12)}textarea.control{resize:vertical;min-height:88px}.search{position:relative}.search input{padding-left:40px}.search span{position:absolute;left:14px;top:11px;color:var(--muted)}
-    .story-list{display:grid;gap:15px}.story{overflow:hidden}.story-main{display:grid;grid-template-columns:1.45fr .78fr .62fr auto;align-items:center;gap:20px;padding:21px}.badges{display:flex;gap:8px;flex-wrap:wrap}.badge{display:inline-flex;border-radius:9px;padding:5px 9px;font-size:11px;font-weight:800}.badge-blue{background:#dbeafe;color:#1d4ed8}.badge-purple{background:#ede9fe;color:#6d28d9}.story h3{margin:10px 0 4px;font-size:18px}.meta{color:var(--muted);font-size:12px}.status{display:inline-flex;border-radius:999px;padding:6px 11px;font-size:11px;font-weight:800}.status-good{color:#027a48;background:#d1fadf}.status-ready{color:#175cd3;background:#dbeafe}.status-bad{color:#b42318;background:#fee4e2}.status-work{color:#b54708;background:#fef0c7}.count-row{display:flex;gap:28px}.count strong{display:block;font-size:25px}.count small{color:var(--muted)}.story-actions{display:flex;gap:3px}.story-detail{display:none;border-top:1px solid var(--border);background:color-mix(in srgb,var(--bg) 80%,var(--card));padding:20px}.story.open .story-detail{display:block}.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:17px}.info{background:var(--card);padding:14px;border:1px solid var(--border);border-radius:12px}.info b{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}.info span{font-size:13px;line-height:1.5}.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:850px;font-size:13px}th{background:color-mix(in srgb,var(--bg) 75%,var(--card));color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:12px}td{padding:12px;border-top:1px solid var(--border)}code{background:#eff6ff;color:#1e40af;border-radius:6px;padding:5px 7px;font-size:12px}.toggle{border:0;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:800}.included{background:#d1fadf;color:#027a48}.excluded{background:#e4e7ec;color:#475467}.empty{padding:55px;text-align:center;border:2px dashed var(--border);border-radius:18px;color:var(--muted)}
+    
+    .toolbar{display:grid;grid-template-columns:1fr 1fr 220px auto;gap:12px;padding:15px;margin:22px 0}.control{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:11px;background:var(--card);color:var(--text);outline:none;transition:.18s}.control:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(1,118,211,.12)}textarea.control{resize:vertical;min-height:88px}.search{position:relative}.search input{padding-left:40px}.search span{position:absolute;left:14px;top:11px;color:var(--muted)}
+    
+    /* Voice Command Inputs */
+    .input-wrap { position: relative; display: flex; width: 100%; }
+    .input-wrap .control { padding-right: 32px; width: 100%; }
+    .mic-btn { position: absolute; right: 8px; top: 10px; background: transparent; border: none; cursor: pointer; opacity: 0.5; font-size: 14px; z-index: 2; padding: 0; transition: .2s; }
+    .mic-btn:hover { opacity: 1; color: var(--primary); transform: scale(1.1); }
+    
+    /* Siri-like Overlay */
+    #siriOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s ease; }
+    #siriOverlay.active { opacity: 1; pointer-events: all; }
+    .siri-orb { width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #22d3ee, #0176d3, #7e22ce); box-shadow: 0 0 50px rgba(1,118,211,0.8), inset 0 0 20px rgba(255,255,255,0.5); animation: pulse 2s infinite alternate; }
+    .siri-text { color: white; font-size: 26px; margin-top: 40px; font-weight: 600; text-align: center; max-width: 80%; }
+    @keyframes pulse { from { transform: scale(0.95); box-shadow: 0 0 40px rgba(1,118,211,0.5); } to { transform: scale(1.05); box-shadow: 0 0 80px rgba(34,211,238,0.9); } }
+    
+    .story-list{display:grid;gap:15px}.story{overflow:hidden}.story-main{display:grid;grid-template-columns:1.45fr .78fr .62fr auto;align-items:center;gap:20px;padding:21px}.badges{display:flex;gap:8px;flex-wrap:wrap}.badge{display:inline-flex;border-radius:9px;padding:5px 9px;font-size:11px;font-weight:800}.badge-blue{background:#dbeafe;color:#1d4ed8}.badge-purple{background:#ede9fe;color:#6d28d9}.story h3{margin:10px 0 4px;font-size:18px}.meta{color:var(--muted);font-size:12px}.status{display:inline-flex;border-radius:999px;padding:6px 11px;font-size:11px;font-weight:800}.status-good{color:#027a48;background:#d1fadf}.status-ready{color:#175cd3;background:#dbeafe}.status-bad{color:#b42318;background:#fee4e2}.status-work{color:#b54708;background:#fef0c7}.count-row{display:flex;gap:28px}.count strong{display:block;font-size:25px}.count small{color:var(--muted)}.story-actions{display:flex;gap:3px}.story-detail{display:none;border-top:1px solid var(--border);background:color-mix(in srgb,var(--bg) 80%,var(--card));padding:20px}.story.open .story-detail{display:block}.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:17px}.info{background:var(--card);padding:14px;border:1px solid var(--border);border-radius:12px}.info b{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}.info span{font-size:13px;line-height:1.5}.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:850px;font-size:13px}th{background:color-mix(in srgb,var(--bg) 75%,var(--card));color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:12px}td{padding:12px;border-top:1px solid var(--border)}code{background:#eff6ff;color:#1e40af;border-radius:6px;padding:5px 7px;font-size:12px}.toggle{border:0;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:800}.included{background:#d1fadf;color:#027a48}.excluded{background:#e4e7ec;color:#475467}.empty{padding:55px;text-align:center;border:2px dashed var(--border);border-radius:18px;color:var(--muted)}
     .features{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:22px}.feature{display:flex;gap:12px;padding:18px}.feature-icon{height:42px;width:42px;flex:none;border-radius:12px;display:grid;place-items:center;background:#dbeafe;color:#1d4ed8}.feature h4{margin:0 0 5px}.feature p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
     .toast{position:fixed;z-index:3000;top:20px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);border:1px solid var(--border);padding:12px 17px;border-radius:13px;box-shadow:0 20px 50px rgba(0,0,0,.2);font-size:13px;font-weight:750;animation:drop .22s ease}.modal-backdrop{position:fixed;z-index:2000;inset:0;background:rgba(3,13,31,.7);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:18px}.modal{width:min(1150px,100%);max-height:94vh;overflow:auto;background:var(--card);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.32)}.modal-head,.modal-foot{position:sticky;z-index:3;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;padding:18px 22px}.modal-head{top:0;border-bottom:1px solid var(--border)}.modal-foot{bottom:0;border-top:1px solid var(--border);justify-content:flex-end;gap:9px}.modal-head h2{margin:2px 0 0;font-size:20px}.modal-body{padding:22px}.section-title{font-weight:850;margin:0 0 15px;display:flex;align-items:center;justify-content:space-between}.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.field label{display:block;color:var(--muted);font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}.span-2{grid-column:span 2}.span-4{grid-column:span 4}.component-area{margin-top:26px}.component-list{display:grid;gap:10px}.component-row{display:grid;grid-template-columns:75px 1fr 210px 135px 105px 1fr 38px;gap:9px;align-items:center;padding:11px;border:1px solid var(--border);border-radius:14px;background:var(--bg)}.check{display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:750}.check input{width:16px;height:16px;accent-color:var(--primary)}
     @keyframes drop{from{opacity:0;transform:translate(-50%,-15px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -25,23 +41,47 @@
 </head>
 <body>
   <div id="toastRoot"></div>
+  
+  <!-- Siri-like Voice Assistant Overlay -->
+  <div id="siriOverlay" onclick="closeSiri()">
+      <div class="siri-orb"></div>
+      <div id="siriText" class="siri-text">Listening...</div>
+  </div>
+
   <header class="header"><div class="header-inner"><div class="brand"><div class="brand-icon">☁</div><div><p class="eyebrow">Release engineering workspace</p><h1>Salesforce Development Control Center</h1><p>Track, validate, package, and audit every metadata change.</p></div></div><div class="actions">
+    <button id="siriToggleBtn" class="btn btn-glass" onclick="toggleVoiceAssistant()">🎧 Enable 'Hey Buddy'</button>
     <input id="excelInput" class="hidden" type="file" accept=".xlsx,.xls"><input id="jsonInput" class="hidden" type="file" accept=".json">
     <button class="btn btn-glass" onclick="document.getElementById('excelInput').click()">⬆ Import</button><button class="btn btn-glass" onclick="exportExcel()">▦ Excel</button><button class="btn btn-glass" onclick="backupJSON()">{} Backup</button><button class="btn btn-glass" onclick="document.getElementById('jsonInput').click()">↻ Restore</button><button class="btn btn-cyan" onclick="generatePackageXml()">&lt;/&gt; package.xml</button><button class="btn btn-white" onclick="openStoryModal()">＋ Add story</button><button id="themeButton" class="btn btn-glass btn-icon" onclick="toggleTheme()" title="Toggle theme">☾</button>
   </div></div></header>
 
   <main class="container">
     <section class="metrics" id="metrics"></section>
-    <section class="toolbar card"><div class="search"><span>⌕</span><input id="searchInput" class="control" placeholder="Search stories, API names, developers, releases..."></div><select id="statusFilter" class="control"></select><select id="releaseFilter" class="control"></select><button class="btn btn-outline" onclick="clearFilters()">☷ Clear filters</button></section>
+    <section class="toolbar card">
+        <div class="search"><span>✨</span><div class="input-wrap"><input id="aiCommandInput" class="control" placeholder="Ask AI: e.g. 'Create story', 'Export excel'" onkeydown="if(event.key==='Enter') processSmartCommand(this.value)"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)" title="Use manual voice command">🎙</button></div></div>
+        <div class="search"><span>⌕</span><div class="input-wrap"><input id="searchInput" class="control" placeholder="Search stories, API names..."><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)" title="Use manual voice command">🎙</button></div></div>
+        <select id="statusFilter" class="control"></select><button class="btn btn-outline" onclick="clearFilters()">☷ Clear filters</button>
+    </section>
     <section id="storyList" class="story-list"></section>
-    <section class="features"><article class="feature card"><div class="feature-icon">✓</div><div><h4>Release governance</h4><p>Track validation steps, dependencies, testing status, and rollback instructions.</p></div></article><article class="feature card"><div class="feature-icon">📦</div><div><h4>Deployment packaging</h4><p>Select components individually and generate a sorted Salesforce package.xml.</p></div></article><article class="feature card"><div class="feature-icon">▦</div><div><h4>Audit-ready exports</h4><p>Export Excel registers and complete JSON backups for handover and recovery.</p></div></article></section>
+    <section class="features"><article class="feature card"><div class="feature-icon">✓</div><div><h4>Release governance</h4><p>Track dependencies and testing status.</p></div></article><article class="feature card"><div class="feature-icon">📦</div><div><h4>Deployment packaging</h4><p>Select components individually and generate a sorted Salesforce package.xml.</p></div></article><article class="feature card"><div class="feature-icon">▦</div><div><h4>Audit-ready exports</h4><p>Export Excel registers and complete JSON backups for handover and recovery.</p></div></article></section>
   </main>
+  
+  <footer style="text-align:center; padding: 25px; color: var(--muted); font-size: 13px; font-weight: 600;">
+      Developed & Trademarked by Prakash Kumar Jha &copy; 2026
+  </footer>
 
   <div id="storyModal" class="modal-backdrop hidden"><div class="modal"><div class="modal-head"><div><p class="eyebrow" style="color:var(--primary)">Story workspace</p><h2 id="modalTitle">Add development story</h2></div><button class="btn btn-outline btn-icon" onclick="closeStoryModal()">✕</button></div><div class="modal-body">
-    <h3 class="section-title">Story and release details</h3><div class="form-grid">
-      <div class="field"><label>Ticket ID *</label><input id="storyId" class="control" placeholder="US-12345"></div><div class="field"><label>Title *</label><input id="storyTitle" class="control"></div><div class="field"><label>Ticket type</label><select id="ticketType" class="control"><option>Story</option><option>Bug</option><option>Task</option><option>Spike</option></select></div><div class="field"><label>Developer</label><input id="developer" class="control" value="Prakash Jha"></div>
-      <div class="field"><label>Environment</label><select id="environment" class="control"><option>Dev</option><option>QA</option><option>UAT</option><option>Production</option></select></div><div class="field"><label>Sprint</label><input id="sprint" class="control"></div><div class="field"><label>Release</label><input id="release" class="control"></div><div class="field"><label>Development status</label><select id="devStatus" class="control"></select></div><div class="field"><label>Testing status</label><select id="testStatus" class="control"></select></div>
-      <div class="field span-2"><label>Description</label><textarea id="description" class="control"></textarea></div><div class="field"><label>Dependencies</label><textarea id="dependencies" class="control"></textarea></div><div class="field"><label>Validation steps</label><textarea id="validationSteps" class="control"></textarea></div><div class="field span-4"><label>Rollback plan</label><textarea id="rollbackPlan" class="control"></textarea></div>
+    <h3 class="section-title">Story details</h3><div class="form-grid">
+      <div class="field"><label>Ticket ID *</label><div class="input-wrap"><input id="storyId" class="control" placeholder="US-12345"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
+      <div class="field"><label>Title *</label><div class="input-wrap"><input id="storyTitle" class="control"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
+      <div class="field"><label>Ticket type</label><select id="ticketType" class="control"><option>Story</option><option>Bug</option><option>Task</option><option>Spike</option></select></div>
+      <div class="field"><label>Developer</label><div class="input-wrap"><input id="developer" class="control" value="Prakash Jha"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
+      
+      <div class="field span-2"><label>Environment</label><select id="environment" class="control"><option>Dev</option><option>QA</option><option>UAT</option><option>Production</option></select></div>
+      <div class="field"><label>Development status</label><select id="devStatus" class="control"></select></div>
+      <div class="field"><label>Testing status</label><select id="testStatus" class="control"></select></div>
+      
+      <div class="field span-2"><label>Description</label><div class="input-wrap"><textarea id="description" class="control"></textarea><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
+      <div class="field span-2"><label>Dependencies</label><div class="input-wrap"><textarea id="dependencies" class="control"></textarea><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
     </div>
     <div class="component-area"><div class="section-title"><span>Attached components</span><button class="btn btn-outline btn-small" onclick="addComponentRow()">＋ Add component</button></div><div id="componentList" class="component-list"></div></div>
   </div><div class="modal-foot"><button class="btn btn-outline" onclick="closeStoryModal()">Cancel</button><button class="btn btn-primary" onclick="saveStory()">✓ Save story</button></div></div></div>
@@ -55,9 +95,11 @@
     const TYPE_MAP={"Apex Class":"ApexClass","Apex Trigger":"ApexTrigger","Lightning Web Component":"LightningComponentBundle","Aura Component":"AuraDefinitionBundle","Custom Object":"CustomObject","Custom Field":"CustomField","Validation Rule":"ValidationRule","Flow":"Flow","Permission Set":"PermissionSet","Permission Set Group":"PermissionSetGroup","Profile":"Profile","Custom Label":"CustomLabel","Email Template":"EmailTemplate","Layout":"Layout","Record Type":"RecordType","FlexiPage":"FlexiPage","Custom Metadata Type":"CustomMetadata","Named Credential":"NamedCredential","Remote Site Setting":"RemoteSiteSetting","Report":"Report","Dashboard":"Dashboard"};
     const uid=()=>window.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const emptyComponent=(sequence=1)=>({id:uid(),apiName:"",type:"Apex Class",change:"Updated",included:true,sequence,notes:""});
-    const emptyStory=()=>({id:uid(),storyId:"",title:"",ticketType:"Story",environment:"Dev",devStatus:"In Development",testStatus:"Not Started",developer:"Prakash Jha",sprint:"",release:"",description:"",dependencies:"",validationSteps:"",rollbackPlan:"",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),components:[emptyComponent()]});
-    const seed=[{...emptyStory(),storyId:"US-0001",title:"Dealer opportunity access",environment:"QA",devStatus:"Ready for Deployment",testStatus:"Passed",release:"Release 1",description:"Provide the required dealer opportunity permissions.",validationSteps:"Log in as an LBDM test user and validate access.",components:[{...emptyComponent(),apiName:"VUK Dealer Opportunity Management",type:"Permission Set",notes:"Object and field permissions updated."}]}];
+    const emptyStory=()=>({id:uid(),storyId:"",title:"",ticketType:"Story",environment:"Dev",devStatus:"In Development",testStatus:"Not Started",developer:"Prakash Jha",description:"",dependencies:"",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),components:[emptyComponent()]});
+    const seed=[{...emptyStory(),storyId:"US-3342",title:"Dealer opportunity access",environment:"QA",devStatus:"Ready for Deployment",testStatus:"Passed",description:"Provide the required dealer opportunity permissions.",components:[{...emptyComponent(),apiName:"VUK Dealer Opportunity Management",type:"Permission Set",notes:"Object and field permissions updated."}]}];
     let stories=loadStories(),editingId=null;
+    
+    // --- CORE LOGIC ---
     function loadStories(){try{const d=JSON.parse(localStorage.getItem(STORAGE_KEY));return Array.isArray(d)?d:seed}catch{return seed}}
     function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(stories))}
     function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]))}
@@ -66,27 +108,274 @@
     function options(values,selected){return values.map(v=>`<option ${v===selected?"selected":""}>${esc(v)}</option>`).join("")}
     function statusClass(s){if(s==="Blocked"||s==="Failed")return"status-bad";if(s==="Deployed"||s==="QA Passed"||s==="Passed")return"status-good";if(s.includes("Ready"))return"status-ready";return"status-work"}
 
-    function init(){document.getElementById("devStatus").innerHTML=options(STATUSES,"In Development");document.getElementById("testStatus").innerHTML=options(TEST_STATUSES,"Not Started");document.getElementById("statusFilter").innerHTML='<option>All</option>'+options(STATUSES);["searchInput","statusFilter","releaseFilter"].forEach(id=>document.getElementById(id).addEventListener(id==="searchInput"?"input":"change",render));document.getElementById("excelInput").addEventListener("change",importExcel);document.getElementById("jsonInput").addEventListener("change",restoreJSON);if(localStorage.getItem("sf-theme")==="dark")document.body.classList.add("dark");render()}
-    function render(){renderMetrics();renderReleaseFilter();renderStories()}
+    // --- "SIRI-LIKE" ALWAYS-ON VOICE ASSISTANT ---
+    let aiContinuous = false;
+    let siriRec = null;
+
+    function toggleVoiceAssistant() {
+        const btn = document.getElementById('siriToggleBtn');
+        if (aiContinuous) {
+            aiContinuous = false;
+            if(siriRec) siriRec.stop();
+            btn.classList.remove('btn-cyan');
+            btn.classList.add('btn-glass');
+            btn.innerText = "🎧 Enable 'Hey Buddy'";
+            toast("Voice Assistant disabled.");
+        } else {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if(!SR) return alert("Speech recognition not supported in this browser.");
+            
+            aiContinuous = true;
+            btn.classList.remove('btn-glass');
+            btn.classList.add('btn-cyan');
+            btn.innerText = "🎧 'Hey Buddy' is ON";
+            
+            siriRec = new SR();
+            siriRec.continuous = true;
+            siriRec.interimResults = false;
+            siriRec.lang = 'en-US';
+            
+            siriRec.onresult = e => {
+                const transcript = e.results[e.results.length-1][0].transcript.toLowerCase().trim();
+                console.log("Buddy Heard: ", transcript);
+                
+                if(transcript.includes("hey buddy")) {
+                    const command = transcript.split("hey buddy")[1].trim();
+                    activateSiri(command);
+                } else if(document.getElementById('siriOverlay').classList.contains('active')) {
+                    activateSiri(transcript);
+                }
+            };
+            
+            siriRec.onend = () => { if(aiContinuous) { try { siriRec.start(); } catch(e){} } };
+            
+            siriRec.onerror = e => {
+                if(e.error === 'not-allowed') {
+                    toggleVoiceAssistant();
+                    alert("Microphone Blocked!\n\nYou must run this HTML file via a local server (like Live Server extension in VS Code) for browsers to allow the microphone.");
+                }
+            };
+            
+            try { siriRec.start(); toast("AI is listening. Just say 'Hey Buddy'..."); } catch(e){}
+        }
+    }
+
+    function activateSiri(command) {
+        document.getElementById('siriOverlay').classList.add('active');
+        document.getElementById('siriText').innerText = command ? `"${command}"` : "Listening...";
+        playDing();
+        
+        if (command) {
+            setTimeout(() => executeSiriCommand(command), 1000);
+        }
+    }
+
+    function closeSiri() {
+        document.getElementById('siriOverlay').classList.remove('active');
+        document.getElementById('siriText').innerText = "Listening...";
+    }
+
+    function playDing() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            osc.connect(ctx.destination);
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.1);
+        } catch(e){}
+    }
+
+    function talkBack(text) {
+        const synth = window.speechSynthesis;
+        const u = new SpeechSynthesisUtterance(text);
+        document.getElementById('siriText').innerText = text;
+        u.onend = () => setTimeout(closeSiri, 1500);
+        synth.speak(u);
+    }
+
+    function executeSiriCommand(cmd) {
+        const text = cmd.toLowerCase();
+        
+        if (text.includes('display') || text.includes('show') || text.includes('open')) {
+            const numbers = text.replace(/[^0-9]/g, '');
+            if (numbers) {
+                const found = stories.find(s => s.storyId.includes(numbers));
+                if (found) {
+                    document.getElementById("searchInput").value = ""; 
+                    render();
+                    const card = document.getElementById(`story-${found.id}`);
+                    if (card) {
+                        card.classList.add('open');
+                        card.scrollIntoView({behavior: 'smooth', block: 'center'});
+                        talkBack(`Okay, I have displayed the card for ${found.storyId}.`);
+                    }
+                    return;
+                }
+            }
+            talkBack("I couldn't find a matching card for that number.");
+        } 
+        else if (text.includes('create story') || text.includes('new story') || text.includes('add story')) {
+            openStoryModal();
+            talkBack("Opening the new story window for you.");
+        }
+        else if (text.includes('export') && text.includes('excel')) {
+            exportExcel();
+            talkBack("I am exporting the Excel register right now.");
+        }
+        else if (text.includes('clear')) {
+            clearFilters();
+            talkBack("Filters have been cleared.");
+        }
+        else if (text.includes('close')) {
+            closeStoryModal();
+            closeSiri();
+        }
+        else {
+            talkBack("I'm not sure how to do that yet. Try asking me to open a card, or export excel.");
+        }
+    }
+
+    // --- MANUAL VOICE INPUT (For specific textboxes) ---
+    function startVoice(btn, inputEl) {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!SR) return toast("Voice recognition not supported in this browser.");
+      
+      if(aiContinuous) {
+         toast("Manual mic is disabled while 'Hey Buddy' is ON.");
+         return;
+      }
+      
+      const rec = new SR();
+      rec.lang = 'en-US';
+      btn.style.color = "var(--danger)";
+      rec.onresult = e => {
+        const t = e.results[0][0].transcript;
+        if(inputEl.tagName === 'TEXTAREA' || inputEl.value) inputEl.value += (inputEl.value ? ' ' : '') + t;
+        else inputEl.value = t;
+        
+        if(inputEl.id === 'aiCommandInput') processSmartCommand(inputEl.value);
+        else if(inputEl.id === 'searchInput') render(); 
+      };
+      rec.onend = () => btn.style.color = "";
+      rec.onerror = (e) => { 
+        btn.style.color = ""; 
+        if (e.error === 'not-allowed') {
+            alert("Microphone Blocked!\nRun this file using a local server (like Live Server in VS Code) for mic access.");
+        }
+      };
+      rec.start();
+    }
+
+    function processSmartCommand(cmd) {
+        if(!cmd) return;
+        const text = cmd.toLowerCase().trim();
+        executeSiriCommand(text);
+        document.getElementById('aiCommandInput').value = '';
+    }
+
+    // --- APP INITIALIZATION ---
+    function init(){document.getElementById("devStatus").innerHTML=options(STATUSES,"In Development");document.getElementById("testStatus").innerHTML=options(TEST_STATUSES,"Not Started");document.getElementById("statusFilter").innerHTML='<option>All</option>'+options(STATUSES);["searchInput","statusFilter"].forEach(id=>document.getElementById(id).addEventListener(id==="searchInput"?"input":"change",render));document.getElementById("excelInput").addEventListener("change",importExcel);document.getElementById("jsonInput").addEventListener("change",restoreJSON);if(localStorage.getItem("sf-theme")==="dark")document.body.classList.add("dark");render()}
+    function render(){renderMetrics();renderStories()}
     function renderMetrics(){const components=stories.reduce((n,s)=>n+s.components.length,0),ready=stories.filter(s=>["QA Passed","Ready for Deployment","Deployed"].includes(s.devStatus)).length,blocked=stories.filter(s=>s.devStatus==="Blocked").length,readiness=stories.length?Math.round(ready/stories.length*100):0;const cards=[["Stories",stories.length,"▤","blue"],["Components",components,"⌘","purple"],["Release ready",ready,"🚀","green"],["Blocked",blocked,"!","red"],["Readiness",readiness+"%","◴","orange"]];document.getElementById("metrics").innerHTML=cards.map(c=>`<article class="metric card"><div class="metric-line ${c[3]}"></div><div class="metric-body"><div><div class="metric-label">${c[0]}</div><div class="metric-value">${c[1]}</div></div><div class="metric-icon ${c[3]}">${c[2]}</div></div></article>`).join("")}
-    function renderReleaseFilter(){const el=document.getElementById("releaseFilter"),old=el.value||"All",rels=[...new Set(stories.map(s=>s.release).filter(Boolean))].sort();el.innerHTML='<option>All</option>'+options(rels,old);if(!rels.includes(old))el.value="All"}
-    function filteredStories(){const q=document.getElementById("searchInput").value.toLowerCase(),st=document.getElementById("statusFilter").value,rel=document.getElementById("releaseFilter").value;return stories.filter(s=>(!q||JSON.stringify(s).toLowerCase().includes(q))&&(st==="All"||s.devStatus===st)&&(rel==="All"||s.release===rel))}
-    function renderStories(){const list=document.getElementById("storyList"),data=filteredStories();if(!data.length){list.innerHTML='<div class="empty"><div style="font-size:34px">□</div><h3>No matching stories</h3><p>Adjust the filters or create a new user story.</p></div>';return}list.innerHTML=data.map(s=>{const selected=s.components.filter(c=>c.included).length;return `<article class="story card" id="story-${esc(s.id)}"><div class="story-main"><div><div class="badges"><span class="badge badge-blue">${esc(s.ticketType)} · ${esc(s.storyId)}</span>${s.release?`<span class="badge badge-purple">${esc(s.release)}</span>`:""}</div><h3>${esc(s.title)}</h3><div class="meta">${esc(s.developer)} · ${esc(s.environment)} · ${esc(s.sprint||"No sprint")}</div></div><div><span class="status ${statusClass(s.devStatus)}">${esc(s.devStatus)}</span><div class="meta" style="margin-top:8px">Testing: <b>${esc(s.testStatus)}</b></div></div><div class="count-row"><div class="count"><strong>${s.components.length}</strong><small>components</small></div><div class="count"><strong style="color:var(--success)">${selected}</strong><small>selected</small></div></div><div class="story-actions"><button class="btn btn-outline btn-icon" title="Duplicate" onclick="duplicateStory('${s.id}')">⧉</button><button class="btn btn-outline btn-icon" title="Edit" onclick="openStoryModal('${s.id}')">✎</button><button class="btn btn-outline btn-icon" title="Delete" onclick="deleteStory('${s.id}')">🗑</button><button class="btn btn-outline btn-icon" onclick="toggleStory('${s.id}')">⌄</button></div></div><div class="story-detail"><div class="info-grid"><div class="info"><b>Description</b><span>${esc(s.description||"Not recorded")}</span></div><div class="info"><b>Dependencies</b><span>${esc(s.dependencies||"Not recorded")}</span></div><div class="info"><b>Validation / rollback</b><span>${esc([s.validationSteps,s.rollbackPlan].filter(Boolean).join(" · ")||"Not recorded")}</span></div></div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Metadata type</th><th>API name</th><th>Change</th><th>Notes</th><th>Deploy</th></tr></thead><tbody>${[...s.components].sort((a,b)=>a.sequence-b.sequence).map(c=>`<tr><td><b>${esc(c.sequence)}</b></td><td>${esc(c.type)}</td><td><code>${esc(c.apiName)}</code></td><td>${esc(c.change)}</td><td>${esc(c.notes||"—")}</td><td><button class="toggle ${c.included?"included":"excluded"}" onclick="toggleInclude('${s.id}','${c.id}')">${c.included?"Included":"Excluded"}</button></td></tr>`).join("")}</tbody></table></div></div></article>`}).join("")}
-    function clearFilters(){document.getElementById("searchInput").value="";document.getElementById("statusFilter").value="All";document.getElementById("releaseFilter").value="All";render()}
+    function filteredStories(){const q=document.getElementById("searchInput").value.toLowerCase(),st=document.getElementById("statusFilter").value;return stories.filter(s=>(!q||JSON.stringify(s).toLowerCase().includes(q))&&(st==="All"||s.devStatus===st))}
+    
+    function renderStories(){const list=document.getElementById("storyList"),data=filteredStories();if(!data.length){list.innerHTML='<div class="empty"><div style="font-size:34px">□</div><h3>No matching stories</h3><p>Adjust the filters or create a new user story.</p></div>';return}list.innerHTML=data.map(s=>{const selected=s.components.filter(c=>c.included).length;return `<article class="story card" id="story-${esc(s.id)}"><div class="story-main"><div><div class="badges"><span class="badge badge-blue">${esc(s.ticketType)} · ${esc(s.storyId)}</span></div><h3>${esc(s.title)}</h3><div class="meta">${esc(s.developer)} · ${esc(s.environment)}</div></div><div><span class="status ${statusClass(s.devStatus)}">${esc(s.devStatus)}</span><div class="meta" style="margin-top:8px">Testing: <b>${esc(s.testStatus)}</b></div></div><div class="count-row"><div class="count"><strong>${s.components.length}</strong><small>components</small></div><div class="count"><strong style="color:var(--success)">${selected}</strong><small>selected</small></div></div><div class="story-actions"><button class="btn btn-outline btn-icon" title="Duplicate" onclick="duplicateStory('${s.id}')">⧉</button><button class="btn btn-outline btn-icon" title="Edit" onclick="openStoryModal('${s.id}')">✎</button><button class="btn btn-outline btn-icon" title="Delete" onclick="deleteStory('${s.id}')">🗑</button><button class="btn btn-outline btn-icon" title="Export Word Document" onclick="exportStoryDoc('${s.id}')">📄</button><button class="btn btn-outline btn-icon" onclick="toggleStory('${s.id}')">⌄</button></div></div><div class="story-detail"><div class="info-grid"><div class="info"><b>Description</b><span>${esc(s.description||"Not recorded")}</span></div><div class="info"><b>Dependencies</b><span>${esc(s.dependencies||"Not recorded")}</span></div></div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Metadata type</th><th>API name</th><th>Change</th><th>Notes</th><th>Deploy</th></tr></thead><tbody>${[...s.components].sort((a,b)=>a.sequence-b.sequence).map(c=>`<tr><td><b>${esc(c.sequence)}</b></td><td>${esc(c.type)}</td><td><code>${esc(c.apiName)}</code></td><td>${esc(c.change)}</td><td>${esc(c.notes||"—")}</td><td><button class="toggle ${c.included?"included":"excluded"}" onclick="toggleInclude('${s.id}','${c.id}')">${c.included?"Included":"Excluded"}</button></td></tr>`).join("")}</tbody></table></div></div></article>`}).join("")}
+    
+    function clearFilters(){document.getElementById("searchInput").value="";document.getElementById("statusFilter").value="All";render()}
     function toggleStory(id){document.getElementById(`story-${id}`)?.classList.toggle("open")}
     function toggleTheme(){document.body.classList.toggle("dark");localStorage.setItem("sf-theme",document.body.classList.contains("dark")?"dark":"light");document.getElementById("themeButton").textContent=document.body.classList.contains("dark")?"☀":"☾"}
 
-    function openStoryModal(id=null){editingId=id;const s=id?JSON.parse(JSON.stringify(stories.find(x=>x.id===id))):emptyStory();document.getElementById("modalTitle").textContent=id?"Edit development story":"Add development story";["storyId","storyTitle","ticketType","developer","environment","sprint","release","devStatus","testStatus","description","dependencies","validationSteps","rollbackPlan"].forEach(key=>{const map={storyTitle:"title"};document.getElementById(key).value=s[map[key]||key]||""});document.getElementById("componentList").innerHTML="";s.components.forEach(addComponentRow);document.getElementById("storyModal").classList.remove("hidden");document.body.style.overflow="hidden"}
+    function openStoryModal(id=null){editingId=id;const s=id?JSON.parse(JSON.stringify(stories.find(x=>x.id===id))):emptyStory();document.getElementById("modalTitle").textContent=id?"Edit development story":"Add development story";["storyId","storyTitle","ticketType","developer","environment","devStatus","testStatus","description","dependencies"].forEach(key=>{const map={storyTitle:"title"};document.getElementById(key).value=s[map[key]||key]||""});document.getElementById("componentList").innerHTML="";s.components.forEach(addComponentRow);document.getElementById("storyModal").classList.remove("hidden");document.body.style.overflow="hidden"}
     function closeStoryModal(){document.getElementById("storyModal").classList.add("hidden");document.body.style.overflow=""}
-    function addComponentRow(data={}){const list=document.getElementById("componentList"),id=data.id||uid(),sequence=data.sequence||list.children.length+1;const row=document.createElement("div");row.className="component-row";row.dataset.id=id;row.innerHTML=`<input class="control comp-sequence" type="number" min="1" value="${esc(sequence)}" title="Deployment order"><input class="control comp-api api-field" value="${esc(data.apiName||"")}" placeholder="Component API name"><select class="control comp-type">${options(TYPES,data.type||"Apex Class")}</select><select class="control comp-change">${options(["Created","Updated","Deleted"],data.change||"Updated")}</select><label class="check"><input class="comp-included" type="checkbox" ${data.included!==false?"checked":""}>Deploy</label><input class="control comp-notes component-notes" value="${esc(data.notes||"")}" placeholder="Component notes"><button class="btn btn-outline btn-icon" onclick="removeComponentRow(this)">🗑</button>`;list.appendChild(row)}
+    function addComponentRow(data={}){const list=document.getElementById("componentList"),id=data.id||uid(),sequence=data.sequence||list.children.length+1;const row=document.createElement("div");row.className="component-row";row.dataset.id=id;row.innerHTML=`<input class="control comp-sequence" type="number" min="1" value="${esc(sequence)}" title="Deployment order"><div class="input-wrap"><input class="control comp-api api-field" value="${esc(data.apiName||"")}" placeholder="Component API name"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div><select class="control comp-type">${options(TYPES,data.type||"Apex Class")}</select><select class="control comp-change">${options(["Created","Updated","Deleted"],data.change||"Updated")}</select><label class="check"><input class="comp-included" type="checkbox" ${data.included!==false?"checked":""}>Deploy</label><div class="input-wrap"><input class="control comp-notes component-notes" value="${esc(data.notes||"")}" placeholder="Component notes"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div><button class="btn btn-outline btn-icon" onclick="removeComponentRow(this)">🗑</button>`;list.appendChild(row)}
     function removeComponentRow(btn){const list=document.getElementById("componentList");if(list.children.length===1)return toast("At least one component row is required.");btn.closest(".component-row").remove()}
-    function saveStory(){const val=id=>document.getElementById(id).value.trim(),storyId=val("storyId").toUpperCase(),title=val("storyTitle"),components=[...document.querySelectorAll(".component-row")].map((r,i)=>({id:r.dataset.id||uid(),apiName:r.querySelector(".comp-api").value.trim(),type:r.querySelector(".comp-type").value,change:r.querySelector(".comp-change").value,included:r.querySelector(".comp-included").checked,sequence:Number(r.querySelector(".comp-sequence").value)||i+1,notes:r.querySelector(".comp-notes").value.trim()})).filter(c=>c.apiName);if(!storyId||!title||!components.length)return toast("Story ID, title, and at least one component are required.");if(stories.some(s=>s.storyId===storyId&&s.id!==editingId))return toast("That Story ID already exists.");const old=stories.find(s=>s.id===editingId),story={id:editingId||uid(),storyId,title,ticketType:val("ticketType"),developer:val("developer"),environment:val("environment"),sprint:val("sprint"),release:val("release"),devStatus:val("devStatus"),testStatus:val("testStatus"),description:val("description"),dependencies:val("dependencies"),validationSteps:val("validationSteps"),rollbackPlan:val("rollbackPlan"),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString(),components};stories=editingId?stories.map(s=>s.id===editingId?story:s):[story,...stories];persist();closeStoryModal();render();toast(editingId?"Story updated.":"Story created.")}
+    function saveStory(){const val=id=>document.getElementById(id).value.trim(),storyId=val("storyId").toUpperCase(),title=val("storyTitle"),components=[...document.querySelectorAll(".component-row")].map((r,i)=>({id:r.dataset.id||uid(),apiName:r.querySelector(".comp-api").value.trim(),type:r.querySelector(".comp-type").value,change:r.querySelector(".comp-change").value,included:r.querySelector(".comp-included").checked,sequence:Number(r.querySelector(".comp-sequence").value)||i+1,notes:r.querySelector(".comp-notes").value.trim()})).filter(c=>c.apiName);if(!storyId||!title||!components.length)return toast("Story ID, title, and at least one component are required.");if(stories.some(s=>s.storyId===storyId&&s.id!==editingId))return toast("That Story ID already exists.");const old=stories.find(s=>s.id===editingId),story={id:editingId||uid(),storyId,title,ticketType:val("ticketType"),developer:val("developer"),environment:val("environment"),devStatus:val("devStatus"),testStatus:val("testStatus"),description:val("description"),dependencies:val("dependencies"),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString(),components};stories=editingId?stories.map(s=>s.id===editingId?story:s):[story,...stories];persist();closeStoryModal();render();toast(editingId?"Story updated.":"Story created.")}
     function deleteStory(id){const s=stories.find(x=>x.id===id);if(confirm(`Delete ${s?.storyId||"this story"} and all its components?`)){stories=stories.filter(x=>x.id!==id);persist();render();toast("Story deleted.")}}
     function duplicateStory(id){const s=JSON.parse(JSON.stringify(stories.find(x=>x.id===id))),base=`${s.storyId}-COPY`;let candidate=base,n=2;while(stories.some(x=>x.storyId===candidate))candidate=`${base}-${n++}`;s.id=uid();s.storyId=candidate;s.title+=` (Copy)`;s.createdAt=s.updatedAt=new Date().toISOString();s.components=s.components.map(c=>({...c,id:uid()}));stories.unshift(s);persist();render();toast("Story duplicated.")}
     function toggleInclude(sid,cid){stories=stories.map(s=>s.id!==sid?s:{...s,updatedAt:new Date().toISOString(),components:s.components.map(c=>c.id===cid?{...c,included:!c.included}:c)});persist();render()}
 
-    function exportExcel(){if(!stories.length)return toast("No data to export.");const rows=stories.flatMap(s=>s.components.map(c=>({"Story ID":s.storyId,"Story Title":s.title,"Ticket Type":s.ticketType,"Environment":s.environment,"Developer":s.developer,"Sprint":s.sprint,"Release":s.release,"Development Status":s.devStatus,"Testing Status":s.testStatus,"Description":s.description,"Dependencies":s.dependencies,"Validation Steps":s.validationSteps,"Rollback Plan":s.rollbackPlan,"Metadata Type":c.type,"Component API Name":c.apiName,"Change Type":c.change,"Deploy?":c.included?"Yes":"No","Sequence":c.sequence,"Component Notes":c.notes})));const ws=XLSX.utils.json_to_sheet(rows);ws["!cols"]=[14,28,13,12,18,14,16,22,18,35,30,35,35,24,38,14,10,10,35].map(wch=>({wch}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Development Register");XLSX.writeFile(wb,`Salesforce_Development_Tracker_${new Date().toISOString().slice(0,10)}.xlsx`);toast("Excel workbook downloaded.")}
-    function importExcel(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const wb=XLSX.read(ev.target.result,{type:"array"}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""}),groups={};rows.forEach(x=>{const sid=String(x["Story ID"]||"").trim().toUpperCase(),api=String(x["Component API Name"]||"").trim();if(!sid||!api)return;if(!groups[sid])groups[sid]={...emptyStory(),storyId:sid,title:String(x["Story Title"]||sid),ticketType:String(x["Ticket Type"]||"Story"),environment:String(x.Environment||"Dev"),developer:String(x.Developer||"Prakash Jha"),sprint:String(x.Sprint||""),release:String(x.Release||""),devStatus:String(x["Development Status"]||"In Development"),testStatus:String(x["Testing Status"]||"Not Started"),description:String(x.Description||""),dependencies:String(x.Dependencies||""),validationSteps:String(x["Validation Steps"]||""),rollbackPlan:String(x["Rollback Plan"]||""),components:[]};groups[sid].components.push({...emptyComponent(),apiName:api,type:TYPES.includes(String(x["Metadata Type"]))?String(x["Metadata Type"]):"Other",change:String(x["Change Type"]||"Updated"),included:String(x["Deploy?"]||"Yes").toLowerCase()!=="no",sequence:Number(x.Sequence)||groups[sid].components.length+1,notes:String(x["Component Notes"]||"")})});const incoming=Object.values(groups);if(!incoming.length)throw Error();const ids=new Set(incoming.map(x=>x.storyId));stories=[...incoming,...stories.filter(x=>!ids.has(x.storyId))];persist();render();toast(`${incoming.length} stories imported. Matching Story IDs were replaced.`)}catch(err){toast("Import failed. Use an Excel file exported from this app.")}e.target.value=""};r.readAsArrayBuffer(file)}
+    // --- WORD DOCUMENT EXPORT ---
+    function exportStoryDoc(id) {
+        const s = stories.find(x => x.id === id);
+        if (!s) return;
+        const content = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset='utf-8'><title>Story Export</title></head>
+            <body style="font-family: Arial, sans-serif;">
+            <h1 style="color: #032d60;">${esc(s.storyId)}: ${esc(s.title)}</h1>
+            <p><b>Developer:</b> ${esc(s.developer)} | <b>Environment:</b> ${esc(s.environment)}</p>
+            <hr>
+            <h3 style="color: #0176d3;">Description</h3>
+            <p>${esc(s.description || "No description provided.")}</p>
+            <h3 style="color: #0176d3;">Dependencies</h3>
+            <p>${esc(s.dependencies || "None.")}</p>
+            <br>
+            <h3 style="color: #0176d3;">Component Changes</h3>
+            <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%; border-color: #e4e7ec; text-align: left;">
+                <tr style="background-color: #f5f7fb;">
+                    <th>Metadata Type</th><th>API Name</th><th>Change Type</th><th>Notes</th>
+                </tr>
+                ${s.components.map(c => `<tr>
+                    <td>${esc(c.type)}</td>
+                    <td><code>${esc(c.apiName)}</code></td>
+                    <td>${esc(c.change)}</td>
+                    <td>${esc(c.notes)}</td>
+                </tr>`).join('')}
+            </table>
+            </body></html>
+        `;
+        const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${s.storyId} - Components changed.doc`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast("Word document downloaded.");
+    }
+
+    // --- EXCEL LOGIC ---
+    function exportExcel(){
+      if(!stories.length) return toast("No data to export.");
+      let merges = [];
+      let currentRow = 1; // 0 is header row
+      
+      const rows = stories.flatMap(s => {
+        const compCount = s.components.length;
+        if (compCount > 1) {
+          merges.push({ s: { r: currentRow, c: 0 }, e: { r: currentRow + compCount - 1, c: 0 } });
+          merges.push({ s: { r: currentRow, c: 1 }, e: { r: currentRow + compCount - 1, c: 1 } });
+        }
+        currentRow += compCount;
+
+        return s.components.map(c => ({
+          "Story ID": s.storyId,
+          "Story Title": s.title,
+          "Ticket Type": s.ticketType,
+          "Environment": s.environment,
+          "Developer": s.developer,
+          "Development Status": s.devStatus,
+          "Testing Status": s.testStatus,
+          "Description": s.description,
+          "Metadata Type": c.type,
+          "Component API Name": c.apiName,
+          "Change Type": c.change,
+          "Component Notes": c.notes,
+          "Dependencies": s.dependencies
+        }));
+      });
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      if(merges.length > 0) ws["!merges"] = merges;
+      ws["!cols"] = [14, 28, 13, 12, 18, 22, 18, 35, 24, 38, 14, 35, 30].map(wch => ({ wch }));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Development Register");
+      XLSX.writeFile(wb, `Salesforce_Development_Tracker_${new Date().toISOString().slice(0,10)}.xlsx`);
+      toast("Excel workbook downloaded.");
+    }
+
+    function importExcel(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const wb=XLSX.read(ev.target.result,{type:"array"}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""}),groups={};rows.forEach(x=>{const sid=String(x["Story ID"]||"").trim().toUpperCase(),api=String(x["Component API Name"]||"").trim();if(!sid||!api)return;if(!groups[sid])groups[sid]={...emptyStory(),storyId:sid,title:String(x["Story Title"]||sid),ticketType:String(x["Ticket Type"]||"Story"),environment:String(x.Environment||"Dev"),developer:String(x.Developer||"Prakash Jha"),devStatus:String(x["Development Status"]||"In Development"),testStatus:String(x["Testing Status"]||"Not Started"),description:String(x.Description||""),dependencies:String(x.Dependencies||""),components:[]};groups[sid].components.push({...emptyComponent(),apiName:api,type:TYPES.includes(String(x["Metadata Type"]))?String(x["Metadata Type"]):"Other",change:String(x["Change Type"]||"Updated"),included:true,sequence:groups[sid].components.length+1,notes:String(x["Component Notes"]||"")})});const incoming=Object.values(groups);if(!incoming.length)throw Error();const ids=new Set(incoming.map(x=>x.storyId));stories=[...incoming,...stories.filter(x=>!ids.has(x.storyId))];persist();render();toast(`${incoming.length} stories imported. Matching Story IDs were replaced.`)}catch(err){toast("Import failed. Use an Excel file exported from this app.")}e.target.value=""};r.readAsArrayBuffer(file)}
     function download(content,name,type){const url=URL.createObjectURL(new Blob([content],{type})),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500)}
     function backupJSON(){download(JSON.stringify({version:1,exportedAt:new Date().toISOString(),stories},null,2),"salesforce-tracker-backup.json","application/json");toast("JSON backup downloaded.")}
     function restoreJSON(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const data=JSON.parse(ev.target.result);if(!Array.isArray(data.stories))throw Error();stories=data.stories;persist();render();toast("Backup restored.")}catch{toast("Invalid backup file.")}e.target.value=""};r.readAsText(file)}

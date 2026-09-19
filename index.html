@@ -16,7 +16,7 @@
     .container{padding:28px 0 60px;flex:1}.metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow)}.metric{overflow:hidden}.metric-line{height:6px}.metric-body{padding:19px;display:flex;align-items:center;justify-content:space-between}.metric-label{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.metric-value{font-size:31px;font-weight:850;margin-top:4px}.metric-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:#fff;font-size:21px;box-shadow:0 8px 20px rgba(0,0,0,.13)}
     .blue{background:linear-gradient(90deg,#3b82f6,#4f46e5)}.purple{background:linear-gradient(90deg,#8b5cf6,#7e22ce)}.green{background:linear-gradient(90deg,#10b981,#0d9488)}.red{background:linear-gradient(90deg,#f43f5e,#dc2626)}.orange{background:linear-gradient(90deg,#fbbf24,#f97316)}
     
-    .toolbar{display:grid;grid-template-columns:1fr 1fr 220px auto;gap:12px;padding:15px;margin:22px 0}.control{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:11px;background:var(--card);color:var(--text);outline:none;transition:.18s}.control:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(1,118,211,.12)}textarea.control{resize:vertical;min-height:88px}.search{position:relative}.search input{padding-left:40px}.search span{position:absolute;left:14px;top:11px;color:var(--muted)}
+    .toolbar{display:grid;grid-template-columns:1fr 220px auto;gap:12px;padding:15px;margin:22px 0}.control{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:11px;background:var(--card);color:var(--text);outline:none;transition:.18s}.control:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(1,118,211,.12)}textarea.control{resize:vertical;min-height:88px}.search{position:relative}.search input{padding-left:40px}.search span{position:absolute;left:14px;top:11px;color:var(--muted)}
     
     /* Voice Command Inputs */
     .input-wrap { position: relative; display: flex; width: 100%; }
@@ -57,7 +57,7 @@
   <main class="container">
     <section class="metrics" id="metrics"></section>
     <section class="toolbar card">
-        <div class="search"><span>✨</span><div class="input-wrap"><input id="aiCommandInput" class="control" placeholder="Ask AI: e.g. 'Create story', 'Export excel'" onkeydown="if(event.key==='Enter') processSmartCommand(this.value)"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)" title="Use manual voice command">🎙</button></div></div>
+        <!-- AI Input removed as requested, standard search retained -->
         <div class="search"><span>⌕</span><div class="input-wrap"><input id="searchInput" class="control" placeholder="Search stories, API names..."><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)" title="Use manual voice command">🎙</button></div></div>
         <select id="statusFilter" class="control"></select><button class="btn btn-outline" onclick="clearFilters()">☷ Clear filters</button>
     </section>
@@ -190,15 +190,55 @@
         const synth = window.speechSynthesis;
         const u = new SpeechSynthesisUtterance(text);
         document.getElementById('siriText').innerText = text;
-        u.onend = () => setTimeout(closeSiri, 1500);
+        u.onend = () => setTimeout(closeSiri, 2500);
         synth.speak(u);
     }
 
+    // ALL NEW UPGRADED AI INTELLIGENCE
     function executeSiriCommand(cmd) {
         const text = cmd.toLowerCase();
+        const numbers = text.replace(/[^0-9]/g, ''); // Extract any ID numbers spoken
         
-        if (text.includes('display') || text.includes('show') || text.includes('open')) {
-            const numbers = text.replace(/[^0-9]/g, '');
+        // 1. Tell me components changed in a story
+        if (text.includes('component') || text.includes('what changed')) {
+            if (numbers) {
+                const found = stories.find(s => s.storyId.includes(numbers));
+                if (found) {
+                    if (found.components.length === 0) {
+                        talkBack(`There are no components attached to story ${found.storyId}.`);
+                    } else {
+                        // Gather component API names or types to read aloud
+                        const compNames = found.components.map(c => c.apiName || c.type).join(', ');
+                        
+                        // Automatically open and scroll to the card
+                        document.getElementById("searchInput").value = ""; 
+                        render();
+                        const card = document.getElementById(`story-${found.id}`);
+                        if (card) { card.classList.add('open'); card.scrollIntoView({behavior: 'smooth', block: 'center'}); }
+                        
+                        talkBack(`The components changed in ${found.storyId} are: ${compNames}.`);
+                    }
+                    return;
+                }
+            }
+            talkBack("Please specify the story number you want to check components for.");
+        }
+        
+        // 2. Export Word Document
+        else if (text.includes('word') || text.includes('document')) {
+            if (numbers) {
+                const found = stories.find(s => s.storyId.includes(numbers));
+                if (found) {
+                    exportStoryDoc(found.id);
+                    talkBack(`Exporting Word document for ${found.storyId}.`);
+                    return;
+                }
+            }
+            talkBack("Please tell me which story number you want to export as a Word document.");
+        }
+        
+        // 3. Open / Show / Display a card
+        else if (text.includes('display') || text.includes('show') || text.includes('open') || text.includes('card')) {
             if (numbers) {
                 const found = stories.find(s => s.storyId.includes(numbers));
                 if (found) {
@@ -214,29 +254,70 @@
                 }
             }
             talkBack("I couldn't find a matching card for that number.");
-        } 
+        }
+        
+        // 4. Create new story
         else if (text.includes('create story') || text.includes('new story') || text.includes('add story')) {
             openStoryModal();
             talkBack("Opening the new story window for you.");
         }
-        else if (text.includes('export') && text.includes('excel')) {
+        
+        // 5. Export Excel
+        else if (text.includes('export excel') || text.includes('download excel')) {
             exportExcel();
             talkBack("I am exporting the Excel register right now.");
         }
+        
+        // 6. Generate Package XML
+        else if (text.includes('package xml') || text.includes('package dot xml') || text.includes('generate package')) {
+            generatePackageXml();
+            talkBack("Generating the package XML file now.");
+        }
+        
+        // 7. Backup JSON
+        else if (text.includes('backup') || text.includes('json')) {
+            backupJSON();
+            talkBack("Downloading the JSON backup file.");
+        }
+        
+        // 8. Search
+        else if (text.includes('search for') || text.includes('find')) {
+            const q = text.split(/(?:search for|find)/)[1].trim();
+            if(q) {
+                document.getElementById("searchInput").value = q;
+                render();
+                talkBack(`Searching for ${q}.`);
+            } else {
+                talkBack("What would you like me to search for?");
+            }
+        }
+        
+        // 9. Theme toggle
+        else if (text.includes('dark mode') || text.includes('light mode') || text.includes('theme')) {
+            toggleTheme();
+            talkBack("Theme changed.");
+        }
+        
+        // 10. Clear filters
         else if (text.includes('clear')) {
             clearFilters();
             talkBack("Filters have been cleared.");
         }
+        
+        // 11. Close Modal
         else if (text.includes('close')) {
             closeStoryModal();
             closeSiri();
+            talkBack("Closed.");
         }
+        
+        // Fallback
         else {
-            talkBack("I'm not sure how to do that yet. Try asking me to open a card, or export excel.");
+            talkBack("I heard you, but I'm not sure how to do that. You can ask me to list components, export files, change theme, or search.");
         }
     }
 
-    // --- MANUAL VOICE INPUT (For specific textboxes) ---
+    // --- MANUAL VOICE INPUT (For specific textboxes only) ---
     function startVoice(btn, inputEl) {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if(!SR) return toast("Voice recognition not supported in this browser.");
@@ -254,8 +335,7 @@
         if(inputEl.tagName === 'TEXTAREA' || inputEl.value) inputEl.value += (inputEl.value ? ' ' : '') + t;
         else inputEl.value = t;
         
-        if(inputEl.id === 'aiCommandInput') processSmartCommand(inputEl.value);
-        else if(inputEl.id === 'searchInput') render(); 
+        if(inputEl.id === 'searchInput') render(); 
       };
       rec.onend = () => btn.style.color = "";
       rec.onerror = (e) => { 
@@ -265,13 +345,6 @@
         }
       };
       rec.start();
-    }
-
-    function processSmartCommand(cmd) {
-        if(!cmd) return;
-        const text = cmd.toLowerCase().trim();
-        executeSiriCommand(text);
-        document.getElementById('aiCommandInput').value = '';
     }
 
     // --- APP INITIALIZATION ---

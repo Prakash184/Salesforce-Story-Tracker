@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Salesforce Development Control Center</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{--primary:#0176d3;--navy:#032d60;--cyan:#22d3ee;--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#667085;--border:#e4e7ec;--success:#039855;--warn:#dc6803;--danger:#d92d20;--shadow:0 12px 35px rgba(16,24,40,.08)}
     body.dark{--bg:#07111f;--card:#101828;--text:#f2f4f7;--muted:#98a2b3;--border:#26354b;--shadow:0 14px 40px rgba(0,0,0,.3)}
@@ -18,13 +19,34 @@
     
     .toolbar{display:grid;grid-template-columns:1fr 180px 180px auto;gap:12px;padding:15px;margin:22px 0}.control{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:11px;background:var(--card);color:var(--text);outline:none;transition:.18s}.control:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(1,118,211,.12)}textarea.control{resize:vertical;min-height:88px}.search{position:relative}.search input{padding-left:40px}.search span{position:absolute;left:14px;top:11px;color:var(--muted)}
     
-    /* Voice Command Inputs */
+    /* Kanban Board Styles */
+    .kanban-board{display:flex;gap:15px;overflow-x:auto;padding-bottom:15px;align-items:flex-start}
+    .kanban-col{flex:1;min-width:280px;background:color-mix(in srgb, var(--bg) 60%, transparent);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+    .kanban-col h4{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);display:flex;justify-content:space-between}
+    .kanban-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;box-shadow:var(--shadow);cursor:grab;transition:0.2s}
+    .kanban-card:active{cursor:grabbing;transform:scale(0.98)}
+    .kanban-card.drag-over{border:2px dashed var(--primary); opacity:0.5;}
+    
+    /* Analytics & Heatmap */
+    .analytics-section{display:none;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:25px}
+    .analytics-section.active{display:grid}
+    .chart-container{padding:20px;height:250px}
+    .heatmap{display:flex;gap:4px;flex-wrap:wrap;margin-top:15px}
+    .heat-block{width:14px;height:14px;border-radius:3px;background:var(--border)}
+    .heat-block[data-val="1"]{background:#d1fadf}.heat-block[data-val="2"]{background:#32d583}.heat-block[data-val="3"]{background:#12b76a}.heat-block[data-val="4"]{background:#039855}
+
+    /* Insights Box */
+    .insights-box{background:#f8fafc;border-left:4px solid var(--primary);padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:15px;font-size:13px}
+    body.dark .insights-box{background:#1e293b}
+    .insights-box h4{margin:0 0 8px;font-size:12px;color:var(--primary);text-transform:uppercase}
+    .insight-item{display:flex;gap:8px;margin-bottom:5px;align-items:center}
+    .insight-warn{color:var(--warn)}.insight-err{color:var(--danger);font-weight:700}.insight-chk{color:var(--success)}
+    
     .input-wrap { position: relative; display: flex; width: 100%; }
     .input-wrap .control { padding-right: 32px; width: 100%; }
     .mic-btn { position: absolute; right: 8px; top: 10px; background: transparent; border: none; cursor: pointer; opacity: 0.5; font-size: 14px; z-index: 2; padding: 0; transition: .2s; }
     .mic-btn:hover { opacity: 1; color: var(--primary); transform: scale(1.1); }
     
-    /* Siri-like Overlay */
     #siriOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s ease; }
     #siriOverlay.active { opacity: 1; pointer-events: all; }
     .siri-orb { width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #22d3ee, #0176d3, #7e22ce); box-shadow: 0 0 50px rgba(1,118,211,0.8), inset 0 0 20px rgba(255,255,255,0.5); animation: pulse 2s infinite alternate; }
@@ -42,14 +64,15 @@
 <body>
   <div id="toastRoot"></div>
   <datalist id="projectDataList"></datalist>
+  <datalist id="storyDataList"></datalist>
   
-  <!-- Siri-like Voice Assistant Overlay -->
   <div id="siriOverlay" onclick="closeSiri()">
       <div class="siri-orb"></div>
       <div id="siriText" class="siri-text">Listening...</div>
   </div>
 
   <header class="header"><div class="header-inner"><div class="brand"><div class="brand-icon">☁</div><div><p class="eyebrow">Release engineering workspace</p><h1>Salesforce Development Control Center</h1><p>Track, validate, package, and audit every metadata change.</p></div></div><div class="actions">
+    <button class="btn btn-glass" onclick="toggleAnalytics()">📊 Analytics</button>
     <button id="siriToggleBtn" class="btn btn-glass" onclick="toggleVoiceAssistant()">🎧 Enable 'Hey Buddy'</button>
     <input id="excelInput" class="hidden" type="file" accept=".xlsx,.xls"><input id="jsonInput" class="hidden" type="file" accept=".json">
     <button class="btn btn-glass" onclick="document.getElementById('excelInput').click()">⬆ Import</button><button class="btn btn-glass" onclick="exportExcel()">▦ Excel</button><button class="btn btn-glass" onclick="backupJSON()">{} Backup</button><button class="btn btn-glass" onclick="document.getElementById('jsonInput').click()">↻ Restore</button><button class="btn btn-cyan" onclick="generatePackageXml()">&lt;/&gt; package.xml</button><button class="btn btn-white" onclick="openStoryModal()">＋ Add story</button><button id="themeButton" class="btn btn-glass btn-icon" onclick="toggleTheme()" title="Toggle theme">☾</button>
@@ -57,13 +80,36 @@
 
   <main class="container">
     <section class="metrics" id="metrics"></section>
+    
+    <!-- ADVANCED ANALYTICS SECTION -->
+    <section id="analyticsSection" class="analytics-section">
+        <div class="card chart-container">
+            <h4 class="section-title" style="margin:0 0 10px; font-size:14px">Components by Type</h4>
+            <canvas id="typeChart"></canvas>
+        </div>
+        <div class="card chart-container" style="display:flex; flex-direction:column">
+            <h4 class="section-title" style="margin:0 0 10px; font-size:14px">30-Day Deployment Velocity</h4>
+            <div id="heatmapContainer" class="heatmap"></div>
+            <div style="margin-top:auto; font-size:11px; color:var(--muted); text-align:right">Heatmap of recent story deployments</div>
+        </div>
+    </section>
+
     <section class="toolbar card">
         <div class="search"><span>⌕</span><div class="input-wrap"><input id="searchInput" class="control" placeholder="Search stories, API names..."><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)" title="Use manual voice command">🎙</button></div></div>
         <select id="projectFilter" class="control" title="Filter by Project"></select>
         <select id="statusFilter" class="control" title="Filter by Status"></select>
-        <button class="btn btn-outline" onclick="clearFilters()">☷ Clear filters</button>
+        <div style="display:flex; gap:8px">
+            <button class="btn btn-outline" onclick="toggleViewMode()" id="viewToggleBtn">◫ Board</button>
+            <button class="btn btn-outline" onclick="clearFilters()" style="flex:1">☷ Clear</button>
+        </div>
     </section>
+    
+    <!-- LIST VIEW -->
     <section id="storyList" class="story-list"></section>
+    
+    <!-- KANBAN BOARD VIEW -->
+    <section id="kanbanBoard" class="kanban-board hidden"></section>
+
     <section class="features"><article class="feature card"><div class="feature-icon">✓</div><div><h4>Release governance</h4><p>Track dependencies and testing status.</p></div></article><article class="feature card"><div class="feature-icon">📦</div><div><h4>Deployment packaging</h4><p>Select components individually and generate a sorted Salesforce package.xml.</p></div></article><article class="feature card"><div class="feature-icon">▦</div><div><h4>Audit-ready exports</h4><p>Export Excel registers and complete JSON backups for handover and recovery.</p></div></article></section>
   </main>
   
@@ -71,7 +117,6 @@
       Developed & Trademarked by Prakash Kumar Jha &copy; 2026
   </footer>
 
-  <!-- Export Excel Project Selection Modal -->
   <div id="exportModal" class="modal-backdrop hidden">
     <div class="modal" style="width: min(400px, 90%); padding: 22px;">
       <h3 class="section-title" style="margin-top:0">Export Excel</h3>
@@ -86,18 +131,18 @@
 
   <div id="storyModal" class="modal-backdrop hidden"><div class="modal"><div class="modal-head"><div><p class="eyebrow" style="color:var(--primary)">Story workspace</p><h2 id="modalTitle">Add development story</h2></div><button class="btn btn-outline btn-icon" onclick="closeStoryModal()">✕</button></div><div class="modal-body">
     <h3 class="section-title">Story details</h3><div class="form-grid">
-      <!-- 4 Column Grid -->
       <div class="field"><label>Ticket ID *</label><div class="input-wrap"><input id="storyId" class="control" placeholder="US-12345"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
       <div class="field"><label>Project *</label><div class="input-wrap"><input id="project" class="control" list="projectDataList" placeholder="e.g. Sales Cloud"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
       <div class="field span-2"><label>Title *</label><div class="input-wrap"><input id="storyTitle" class="control"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
       
-      <div class="field"><label>Ticket type</label><select id="ticketType" class="control"><option>Story</option><option>Bug</option><option>Task</option><option>Spike</option></select></div>
+      <div class="field"><label>Ticket type</label><select id="ticketType" class="control" onchange="toggleRelatedTo()"><option>Story</option><option>Bug</option><option>Task</option><option>Spike</option></select></div>
+      <div class="field" id="relatedToField" style="display:none;"><label>Related to (Story)</label><div class="input-wrap"><input id="relatedTo" class="control" list="storyDataList" placeholder="e.g. US-3342"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
       <div class="field"><label>Developer</label><div class="input-wrap"><input id="developer" class="control" value="Prakash Jha"><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
       <div class="field"><label>Environment</label><select id="environment" class="control"><option>Dev</option><option>QA</option><option>UAT</option><option>Production</option></select></div>
-      <div class="field"><label>Development status</label><select id="devStatus" class="control"></select></div>
       
-      <div class="field span-2"><label>Testing status</label><select id="testStatus" class="control"></select></div>
-      <div class="field span-2"><label>Description</label><div class="input-wrap"><textarea id="description" class="control"></textarea><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
+      <div class="field"><label>Development status</label><select id="devStatus" class="control"></select></div>
+      <div class="field"><label>Testing status</label><select id="testStatus" class="control"></select></div>
+      <div class="field span-2"><label>Description</label><div class="input-wrap"><textarea id="description" class="control" placeholder="Describe the change... (Say 'Hey Buddy, write description' to auto-generate)"></textarea><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
       <div class="field span-4"><label>Dependencies</label><div class="input-wrap"><textarea id="dependencies" class="control"></textarea><button type="button" class="mic-btn" onclick="startVoice(this, this.previousElementSibling)">🎙</button></div></div>
     </div>
     <div class="component-area"><div class="section-title"><span>Attached components</span><button class="btn btn-outline btn-small" onclick="addComponentRow()">＋ Add component</button></div><div id="componentList" class="component-list"></div></div>
@@ -112,10 +157,14 @@
     const TYPE_MAP={"Apex Class":"ApexClass","Apex Trigger":"ApexTrigger","Lightning Web Component":"LightningComponentBundle","Aura Component":"AuraDefinitionBundle","Custom Object":"CustomObject","Custom Field":"CustomField","Validation Rule":"ValidationRule","Flow":"Flow","Permission Set":"PermissionSet","Permission Set Group":"PermissionSetGroup","Profile":"Profile","Custom Label":"CustomLabel","Email Template":"EmailTemplate","Layout":"Layout","Record Type":"RecordType","FlexiPage":"FlexiPage","Custom Metadata Type":"CustomMetadata","Named Credential":"NamedCredential","Remote Site Setting":"RemoteSiteSetting","Report":"Report","Dashboard":"Dashboard"};
     const uid=()=>window.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const emptyComponent=(sequence=1)=>({id:uid(),apiName:"",type:"Apex Class",change:"Updated",included:true,sequence,notes:""});
-    const emptyStory=()=>({id:uid(),storyId:"",project:"",title:"",ticketType:"Story",environment:"Dev",devStatus:"In Development",testStatus:"Not Started",developer:"Prakash Jha",description:"",dependencies:"",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),components:[emptyComponent()]});
+    const emptyStory=()=>({id:uid(),storyId:"",project:"",title:"",ticketType:"Story",relatedTo:"",environment:"Dev",devStatus:"In Development",testStatus:"Not Started",developer:"Prakash Jha",description:"",dependencies:"",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),components:[emptyComponent()]});
     const seed=[{...emptyStory(),storyId:"US-3342",project:"",title:"Dealer opportunity access",environment:"QA",devStatus:"Ready for Deployment",testStatus:"Passed",description:"Provide the required dealer opportunity permissions.",components:[{...emptyComponent(),apiName:"VUK Dealer Opportunity Management",type:"Permission Set",notes:"Object and field permissions updated."}]}];
     let stories=loadStories(),editingId=null;
     
+    // View States
+    let isKanban = false;
+    let typeChartInstance = null;
+
     // --- CORE LOGIC ---
     function loadStories(){try{const d=JSON.parse(localStorage.getItem(STORAGE_KEY));return Array.isArray(d)?d:seed}catch{return seed}}
     function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(stories))}
@@ -125,7 +174,38 @@
     function options(values,selected){return values.map(v=>`<option value="${esc(v)}" ${v===selected?"selected":""}>${esc(v)}</option>`).join("")}
     function statusClass(s){if(s==="Blocked"||s==="Failed")return"status-bad";if(s==="Deployed"||s==="QA Passed"||s==="Passed")return"status-good";if(s.includes("Ready"))return"status-ready";return"status-work"}
 
-    // --- "SIRI-LIKE" ALWAYS-ON VOICE ASSISTANT ---
+    function toggleRelatedTo() {
+        const type = document.getElementById("ticketType").value;
+        document.getElementById("relatedToField").style.display = type === "Bug" ? "block" : "none";
+    }
+
+    function toggleViewMode() {
+        isKanban = !isKanban;
+        document.getElementById("viewToggleBtn").innerText = isKanban ? "▤ List" : "◫ Board";
+        document.getElementById("storyList").classList.toggle("hidden", isKanban);
+        document.getElementById("kanbanBoard").classList.toggle("hidden", !isKanban);
+        renderStories();
+    }
+
+    // --- AI AUTO-DESCRIPTION GENERATOR (Feature 12) ---
+    function autoGenerateDescription() {
+        const components = [...document.querySelectorAll(".component-row")];
+        if(!components.length) return "No components attached yet.";
+        
+        let types = {};
+        components.forEach(r => {
+            const t = r.querySelector(".comp-type").value;
+            types[t] = (types[t] || 0) + 1;
+        });
+        
+        let summary = `Technical implementation involving ${components.length} metadata components. Primary changes include: `;
+        summary += Object.entries(types).map(([type, count]) => `${count}x ${type}`).join(", ") + ". ";
+        summary += `\nEnsure all associated permissions and layouts are validated post-deployment.`;
+        
+        document.getElementById("description").value = summary;
+    }
+
+    // --- "SIRI-LIKE" ALWAYS-ON VOICE ASSISTANT WITH BULK COMMANDS (Feature 8 & 12) ---
     let aiContinuous = false;
     let siriRec = null;
 
@@ -154,8 +234,6 @@
             
             siriRec.onresult = e => {
                 const transcript = e.results[e.results.length-1][0].transcript.toLowerCase().trim();
-                console.log("Buddy Heard: ", transcript);
-                
                 if(transcript.includes("hey buddy")) {
                     const command = transcript.split("hey buddy")[1].trim();
                     activateSiri(command);
@@ -169,10 +247,9 @@
             siriRec.onerror = e => {
                 if(e.error === 'not-allowed') {
                     toggleVoiceAssistant();
-                    alert("Microphone Blocked!\n\nYou must run this HTML file via a local server (like Live Server extension in VS Code) for browsers to allow the microphone.");
+                    alert("Microphone Blocked!\nRun this HTML file via a local server.");
                 }
             };
-            
             try { siriRec.start(); toast("AI is listening. Just say 'Hey Buddy'..."); } catch(e){}
         }
     }
@@ -181,67 +258,59 @@
         document.getElementById('siriOverlay').classList.add('active');
         document.getElementById('siriText').innerText = command ? `"${command}"` : "Listening...";
         playDing();
-        
-        if (command) {
-            setTimeout(() => executeSiriCommand(command), 1000);
-        }
+        if (command) setTimeout(() => executeSiriCommand(command), 1000);
     }
+    function closeSiri() { document.getElementById('siriOverlay').classList.remove('active'); document.getElementById('siriText').innerText = "Listening..."; }
+    function playDing() { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const osc = ctx.createOscillator(); osc.connect(ctx.destination); osc.frequency.setValueAtTime(880, ctx.currentTime); osc.start(); osc.stop(ctx.currentTime + 0.1); } catch(e){} }
+    function talkBack(text) { const synth = window.speechSynthesis; const u = new SpeechSynthesisUtterance(text); document.getElementById('siriText').innerText = text; u.onend = () => setTimeout(closeSiri, 2500); synth.speak(u); }
 
-    function closeSiri() {
-        document.getElementById('siriOverlay').classList.remove('active');
-        document.getElementById('siriText').innerText = "Listening...";
-    }
-
-    function playDing() {
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            osc.connect(ctx.destination);
-            osc.frequency.setValueAtTime(880, ctx.currentTime);
-            osc.start();
-            osc.stop(ctx.currentTime + 0.1);
-        } catch(e){}
-    }
-
-    function talkBack(text) {
-        const synth = window.speechSynthesis;
-        const u = new SpeechSynthesisUtterance(text);
-        document.getElementById('siriText').innerText = text;
-        u.onend = () => setTimeout(closeSiri, 2500);
-        synth.speak(u);
-    }
-
-    // ALL NEW UPGRADED AI INTELLIGENCE WITH PROJECT SUPPORT
     function executeSiriCommand(cmd) {
         const text = cmd.toLowerCase();
         const numbers = text.replace(/[^0-9]/g, ''); 
         
-        if (text.includes('project')) {
-            const allProjects = [...new Set(stories.map(s => s.project || "General"))];
-            let foundProj = null;
-            for(let p of allProjects) {
-                if(text.includes(p.toLowerCase())) { foundProj = p; break; }
-            }
-            if(foundProj) {
-                document.getElementById("projectFilter").value = foundProj;
-                render();
-                talkBack(`Showing your dashboard for project ${foundProj}.`);
-                return;
-            }
+        // Feature 8: Bulk Actions
+        if (text.includes('mark all') && text.includes('ready')) {
+            let count = 0;
+            stories.forEach(s => { if(s.devStatus.includes("QA")) { s.devStatus = "Ready for Deployment"; s.updatedAt = new Date().toISOString(); count++; }});
+            if(count > 0) { persist(); render(); talkBack(`Marked ${count} stories as Ready for Deployment.`); return; }
+            talkBack("No QA stories found to update.");
+        }
+        else if (text.includes('delete all blocked')) {
+            const initial = stories.length;
+            stories = stories.filter(s => s.devStatus !== 'Blocked');
+            const diff = initial - stories.length;
+            if(diff > 0) { persist(); render(); talkBack(`Deleted ${diff} blocked stories.`); return;}
+            talkBack("No blocked stories found.");
         }
         
-        if (text.includes('component') || text.includes('what changed')) {
+        // Feature 12: Auto-Description
+        else if (text.includes('write description') || text.includes('generate description')) {
+            if(!document.getElementById("storyModal").classList.contains("hidden")) {
+                autoGenerateDescription();
+                talkBack("I have generated a technical description based on your components.");
+            } else {
+                talkBack("Please open a story first before asking me to write a description.");
+            }
+            return;
+        }
+        
+        // Previous commands
+        else if (text.includes('project')) {
+            const allProjects = [...new Set(stories.map(s => s.project || "General"))];
+            let foundProj = null;
+            for(let p of allProjects) { if(text.includes(p.toLowerCase())) { foundProj = p; break; } }
+            if(foundProj) { document.getElementById("projectFilter").value = foundProj; render(); talkBack(`Showing your dashboard for project ${foundProj}.`); return; }
+        }
+        else if (text.includes('component') || text.includes('what changed')) {
             if (numbers) {
                 const found = stories.find(s => s.storyId.includes(numbers));
                 if (found) {
-                    if (found.components.length === 0) {
-                        talkBack(`There are no components attached to story ${found.storyId}.`);
-                    } else {
+                    if (found.components.length === 0) talkBack(`There are no components attached to story ${found.storyId}.`);
+                    else {
                         const compNames = found.components.map(c => c.apiName || c.type).join(', ');
-                        document.getElementById("searchInput").value = ""; 
-                        render();
+                        document.getElementById("searchInput").value = ""; render();
                         const card = document.getElementById(`story-${found.id}`);
-                        if (card) { card.classList.add('open'); card.scrollIntoView({behavior: 'smooth', block: 'center'}); }
+                        if (card && !isKanban) { card.classList.add('open'); card.scrollIntoView({behavior: 'smooth', block: 'center'}); }
                         talkBack(`The components changed in ${found.storyId} are: ${compNames}.`);
                     }
                     return;
@@ -249,92 +318,31 @@
             }
             talkBack("Please specify the story number you want to check components for.");
         }
-        
         else if (text.includes('word') || text.includes('document')) {
-            if (numbers) {
-                const found = stories.find(s => s.storyId.includes(numbers));
-                if (found) {
-                    exportStoryDoc(found.id);
-                    talkBack(`Exporting Word document for ${found.storyId}.`);
-                    return;
-                }
-            }
+            if (numbers) { const found = stories.find(s => s.storyId.includes(numbers)); if (found) { exportStoryDoc(found.id); talkBack(`Exporting Word document for ${found.storyId}.`); return; } }
             talkBack("Please tell me which story number you want to export as a Word document.");
         }
-        
         else if (text.includes('display') || text.includes('show') || text.includes('open') || text.includes('card')) {
-            if (numbers) {
-                const found = stories.find(s => s.storyId.includes(numbers));
-                if (found) {
-                    document.getElementById("searchInput").value = ""; 
-                    render();
-                    const card = document.getElementById(`story-${found.id}`);
-                    if (card) {
-                        card.classList.add('open');
-                        card.scrollIntoView({behavior: 'smooth', block: 'center'});
-                        talkBack(`Okay, I have displayed the card for ${found.storyId}.`);
-                    }
-                    return;
-                }
-            }
+            if (numbers) { const found = stories.find(s => s.storyId.includes(numbers)); if (found) { document.getElementById("searchInput").value = ""; render(); const card = document.getElementById(`story-${found.id}`); if (card && !isKanban) { card.classList.add('open'); card.scrollIntoView({behavior: 'smooth', block: 'center'}); } talkBack(`Okay, I have displayed the card for ${found.storyId}.`); return; } }
             talkBack("I couldn't find a matching card for that number.");
         }
-        
-        else if (text.includes('create story') || text.includes('new story') || text.includes('add story')) {
-            openStoryModal();
-            talkBack("Opening the new story window for you.");
-        }
-        else if (text.includes('export excel') || text.includes('download excel')) {
-            exportExcel();
-            talkBack("Please select the project you want to export.");
-        }
-        else if (text.includes('package xml') || text.includes('package dot xml') || text.includes('generate package')) {
-            generatePackageXml();
-            talkBack("Generating the package XML file now.");
-        }
-        else if (text.includes('backup') || text.includes('json')) {
-            backupJSON();
-            talkBack("Downloading the JSON backup file.");
-        }
-        else if (text.includes('search for') || text.includes('find')) {
-            const q = text.split(/(?:search for|find)/)[1].trim();
-            if(q) {
-                document.getElementById("searchInput").value = q;
-                render();
-                talkBack(`Searching for ${q}.`);
-            } else {
-                talkBack("What would you like me to search for?");
-            }
-        }
-        else if (text.includes('dark mode') || text.includes('light mode') || text.includes('theme')) {
-            toggleTheme();
-            talkBack("Theme changed.");
-        }
-        else if (text.includes('clear')) {
-            clearFilters();
-            talkBack("Filters have been cleared.");
-        }
-        else if (text.includes('close')) {
-            closeStoryModal();
-            document.getElementById('exportModal').classList.add('hidden');
-            closeSiri();
-            talkBack("Closed.");
-        }
-        else {
-            talkBack("I heard you, but I'm not sure how to do that. You can ask me to list components, export files, change theme, or search.");
-        }
+        else if (text.includes('create story') || text.includes('new story') || text.includes('add story')) { openStoryModal(); talkBack("Opening the new story window for you."); }
+        else if (text.includes('export excel') || text.includes('download excel')) { exportExcel(); talkBack("Please select the project you want to export."); }
+        else if (text.includes('package xml')) { generatePackageXml(); talkBack("Generating the package XML file now."); }
+        else if (text.includes('backup') || text.includes('json')) { backupJSON(); talkBack("Downloading the JSON backup file."); }
+        else if (text.includes('search for') || text.includes('find')) { const q = text.split(/(?:search for|find)/)[1].trim(); if(q) { document.getElementById("searchInput").value = q; render(); talkBack(`Searching for ${q}.`); } else { talkBack("What would you like me to search for?"); } }
+        else if (text.includes('dark mode') || text.includes('theme')) { toggleTheme(); talkBack("Theme changed."); }
+        else if (text.includes('board view') || text.includes('kanban')) { isKanban = false; toggleViewMode(); talkBack("Switched to Kanban Board view."); }
+        else if (text.includes('list view')) { isKanban = true; toggleViewMode(); talkBack("Switched to List view."); }
+        else if (text.includes('clear')) { clearFilters(); talkBack("Filters have been cleared."); }
+        else if (text.includes('close')) { closeStoryModal(); document.getElementById('exportModal').classList.add('hidden'); closeSiri(); talkBack("Closed."); }
+        else { talkBack("I am not sure how to do that. You can ask me to list components, export files, change views, or mark all QA stories as ready."); }
     }
 
-    // --- MANUAL VOICE INPUT (For specific textboxes only) ---
     function startVoice(btn, inputEl) {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if(!SR) return toast("Voice recognition not supported in this browser.");
-      
-      if(aiContinuous) {
-         toast("Manual mic is disabled while 'Hey Buddy' is ON.");
-         return;
-      }
-      
+      if(aiContinuous) { toast("Manual mic is disabled while 'Hey Buddy' is ON."); return; }
       const rec = new SR();
       rec.lang = 'en-US';
       btn.style.color = "var(--danger)";
@@ -342,16 +350,10 @@
         const t = e.results[0][0].transcript;
         if(inputEl.tagName === 'TEXTAREA' || inputEl.value) inputEl.value += (inputEl.value ? ' ' : '') + t;
         else inputEl.value = t;
-        
         if(inputEl.id === 'searchInput') render(); 
       };
       rec.onend = () => btn.style.color = "";
-      rec.onerror = (e) => { 
-        btn.style.color = ""; 
-        if (e.error === 'not-allowed') {
-            alert("Microphone Blocked!\nRun this file using a local server (like Live Server in VS Code) for mic access.");
-        }
-      };
+      rec.onerror = (e) => { btn.style.color = ""; if (e.error === 'not-allowed') alert("Microphone Blocked!"); };
       rec.start();
     }
 
@@ -367,24 +369,93 @@
         render();
     }
 
-    // Dynamic Project Rendering
-    function renderProjects() {
+    // --- FEATURE 1, 7, 11: SMART INSIGHTS GENERATOR (Conflicts, QA, Impact) ---
+    function getSmartInsights(storyId, components) {
+        let warnings = [], checklist = [], conflicts = [];
+        components.forEach(c => {
+            if(!c.apiName) return;
+            // 1. Conflict Detector
+            stories.forEach(s => {
+                if(s.id !== storyId && s.components.some(sc => sc.apiName === c.apiName && sc.type === c.type)) {
+                    conflicts.push(`<b>${esc(c.apiName)}</b> is also being modified in <b>${esc(s.storyId)}</b>`);
+                }
+            });
+            // 7. QA Checklist & 11. Impact Warning
+            if(c.type.includes('Apex')) checklist.push(`Verify 75%+ Code Coverage for <code>${esc(c.apiName)}</code>`);
+            if(c.type === 'Custom Field') {
+                warnings.push(`Ensure FLS is set in Profiles/Permission Sets for <code>${esc(c.apiName)}</code>`);
+                checklist.push(`Verify visibility of <code>${esc(c.apiName)}</code> on Page Layouts`);
+            }
+            if(c.type === 'Record Type') warnings.push(`Assign Page Layout for Record Type <code>${esc(c.apiName)}</code>`);
+            if(c.type === 'Lightning Web Component') checklist.push(`Verify Jest tests for <code>${esc(c.apiName)}</code>`);
+        });
+        return { warnings: [...new Set(warnings)], checklist: [...new Set(checklist)], conflicts: [...new Set(conflicts)] };
+    }
+
+    // --- FEATURE 6 & 15: ADVANCED ANALYTICS & HEATMAP ---
+    function toggleAnalytics() {
+        const sec = document.getElementById("analyticsSection");
+        sec.classList.toggle("active");
+        if(sec.classList.contains("active")) renderAnalytics();
+    }
+    
+    function renderAnalytics() {
+        // Render Heatmap (Last 30 Days Deployments)
+        const heatmap = document.getElementById("heatmapContainer");
+        heatmap.innerHTML = "";
+        const today = new Date();
+        const dates = {};
+        stories.forEach(s => {
+            if(s.devStatus === "Deployed" && s.updatedAt) {
+                const d = s.updatedAt.slice(0,10);
+                dates[d] = (dates[d] || 0) + 1;
+            }
+        });
+        for(let i=29; i>=0; i--) {
+            let d = new Date(today);
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toISOString().slice(0,10);
+            const val = dates[dateStr] || 0;
+            const heatLvl = val === 0 ? 0 : val < 3 ? 1 : val < 6 ? 2 : val < 10 ? 3 : 4;
+            heatmap.innerHTML += `<div class="heat-block" data-val="${heatLvl}" title="${dateStr}: ${val} Deployed"></div>`;
+        }
+
+        // Render Chart.js (Components by Type)
+        const types = {};
+        stories.forEach(s => s.components.forEach(c => { types[c.type] = (types[c.type]||0) + 1; }));
+        const ctx = document.getElementById('typeChart').getContext('2d');
+        if(typeChartInstance) typeChartInstance.destroy();
+        typeChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(types),
+                datasets: [{
+                    data: Object.values(types),
+                    backgroundColor: ['#0176d3','#22d3ee','#8b5cf6','#10b981','#f97316','#f43f5e','#64748b'],
+                    borderWidth: 0
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: {color: '#667085'} } } }
+        });
+    }
+
+    function renderDynamicLists() {
         const allProjects = [...new Set(stories.map(s => s.project || "General"))].sort();
-        
-        // Update Datalist (for Modal)
         document.getElementById("projectDataList").innerHTML = allProjects.map(p => `<option value="${esc(p)}">`).join("");
-        
-        // Update Filter Dropdown
         const pFilter = document.getElementById("projectFilter");
         const oldVal = pFilter.value || "All";
         pFilter.innerHTML = '<option value="All">All Projects</option>' + allProjects.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join("");
         pFilter.value = allProjects.includes(oldVal) ? oldVal : "All";
+
+        const allStoryIds = [...new Set(stories.map(s => s.storyId))].sort();
+        document.getElementById("storyDataList").innerHTML = allStoryIds.map(id => `<option value="${esc(id)}">`).join("");
     }
 
     function render(){
-        renderProjects();
+        renderDynamicLists();
         renderMetrics();
         renderStories();
+        if(document.getElementById("analyticsSection").classList.contains("active")) renderAnalytics();
     }
 
     function renderMetrics(){
@@ -393,15 +464,7 @@
         const blocked=stories.filter(s=>s.devStatus==="Blocked").length;
         const readiness=stories.length?Math.round(ready/stories.length*100):0;
         const totalProjects=[...new Set(stories.map(s=>s.project||"General"))].length;
-        
-        const cards=[
-            ["Projects",totalProjects,"📁","cyan"],
-            ["Stories",stories.length,"▤","blue"],
-            ["Components",components,"⌘","purple"],
-            ["Release ready",ready,"🚀","green"],
-            ["Blocked",blocked,"!","red"],
-            ["Readiness",readiness+"%","◴","orange"]
-        ];
+        const cards=[ ["Projects",totalProjects,"📁","cyan"], ["Stories",stories.length,"▤","blue"], ["Components",components,"⌘","purple"], ["Release ready",ready,"🚀","green"], ["Blocked",blocked,"!","red"], ["Readiness",readiness+"%","◴","orange"] ];
         document.getElementById("metrics").innerHTML=cards.map(c=>`<article class="metric card"><div class="metric-line ${c[3]}"></div><div class="metric-body"><div><div class="metric-label">${c[0]}</div><div class="metric-value">${c[1]}</div></div><div class="metric-icon ${c[3]}">${c[2]}</div></div></article>`).join("");
     }
 
@@ -409,22 +472,69 @@
         const q=document.getElementById("searchInput").value.toLowerCase();
         const st=document.getElementById("statusFilter").value;
         const proj=document.getElementById("projectFilter").value;
-        
-        return stories.filter(s=>
-            (!q||JSON.stringify(s).toLowerCase().includes(q)) &&
-            (st==="All"||s.devStatus===st) &&
-            (proj==="All"||(s.project||"General")===proj)
-        );
+        return stories.filter(s=>(!q||JSON.stringify(s).toLowerCase().includes(q)) && (st==="All"||s.devStatus===st) && (proj==="All"||(s.project||"General")===proj));
     }
     
+    // --- KANBAN DRAG AND DROP ---
+    function drag(ev, id) { ev.dataTransfer.setData("text", id); }
+    function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('drag-over'); }
+    function dragLeave(ev) { ev.currentTarget.classList.remove('drag-over'); }
+    function drop(ev, status) {
+        ev.preventDefault();
+        ev.currentTarget.classList.remove('drag-over');
+        const id = ev.dataTransfer.getData("text");
+        const story = stories.find(s => s.id === id);
+        if(story && story.devStatus !== status) {
+            story.devStatus = status;
+            story.updatedAt = new Date().toISOString();
+            persist(); render();
+        }
+    }
+
     function renderStories(){
-        const list=document.getElementById("storyList"),data=filteredStories();
-        if(!data.length){list.innerHTML='<div class="empty"><div style="font-size:34px">□</div><h3>No matching stories</h3><p>Adjust the filters or create a new user story.</p></div>';return}
+        const list=document.getElementById("storyList"), board=document.getElementById("kanbanBoard"), data=filteredStories();
         
-        list.innerHTML=data.map(s=>{
-            const selected=s.components.filter(c=>c.included).length;
-            return `<article class="story card" id="story-${esc(s.id)}"><div class="story-main"><div><div class="badges"><span class="badge badge-purple">${esc(s.project||"General")}</span><span class="badge badge-blue">${esc(s.ticketType)} · ${esc(s.storyId)}</span></div><h3>${esc(s.title)}</h3><div class="meta">${esc(s.developer)} · ${esc(s.environment)}</div></div><div><span class="status ${statusClass(s.devStatus)}">${esc(s.devStatus)}</span><div class="meta" style="margin-top:8px">Testing: <b>${esc(s.testStatus)}</b></div></div><div class="count-row"><div class="count"><strong>${s.components.length}</strong><small>components</small></div><div class="count"><strong style="color:var(--success)">${selected}</strong><small>selected</small></div></div><div class="story-actions"><button class="btn btn-outline btn-icon" title="Duplicate" onclick="duplicateStory('${s.id}')">⧉</button><button class="btn btn-outline btn-icon" title="Edit" onclick="openStoryModal('${s.id}')">✎</button><button class="btn btn-outline btn-icon" title="Delete" onclick="deleteStory('${s.id}')">🗑</button><button class="btn btn-outline btn-icon" title="Export Word Document" onclick="exportStoryDoc('${s.id}')">📄</button><button class="btn btn-outline btn-icon" onclick="toggleStory('${s.id}')">⌄</button></div></div><div class="story-detail"><div class="info-grid"><div class="info"><b>Description</b><span>${esc(s.description||"Not recorded")}</span></div><div class="info"><b>Dependencies</b><span>${esc(s.dependencies||"Not recorded")}</span></div></div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Metadata type</th><th>API name</th><th>Change</th><th>Notes</th><th>Deploy</th></tr></thead><tbody>${[...s.components].sort((a,b)=>a.sequence-b.sequence).map(c=>`<tr><td><b>${esc(c.sequence)}</b></td><td>${esc(c.type)}</td><td><code>${esc(c.apiName)}</code></td><td>${esc(c.change)}</td><td>${esc(c.notes||"—")}</td><td><button class="toggle ${c.included?"included":"excluded"}" onclick="toggleInclude('${s.id}','${c.id}')">${c.included?"Included":"Excluded"}</button></td></tr>`).join("")}</tbody></table></div></div></article>`
-        }).join("");
+        if(!data.length){
+            list.innerHTML='<div class="empty"><div style="font-size:34px">□</div><h3>No matching stories</h3><p>Adjust the filters or create a new user story.</p></div>';
+            board.innerHTML = list.innerHTML;
+            return;
+        }
+        
+        if(isKanban) {
+            board.innerHTML = STATUSES.map(stat => {
+                const colStories = data.filter(s => s.devStatus === stat);
+                return `<div class="kanban-col" ondrop="drop(event, '${stat}')" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                    <h4>${stat} <span>${colStories.length}</span></h4>
+                    ${colStories.map(s => `
+                        <div class="kanban-card" draggable="true" ondragstart="drag(event, '${s.id}')" onclick="openStoryModal('${s.id}')">
+                            <div style="font-size:11px; color:var(--primary); font-weight:800; margin-bottom:4px">${esc(s.storyId)}</div>
+                            <div style="font-size:13px; font-weight:600; margin-bottom:6px; line-height:1.3">${esc(s.title)}</div>
+                            <div style="font-size:11px; color:var(--muted); display:flex; justify-content:space-between">
+                                <span>${s.components.length} comps</span>
+                                <span class="${s.ticketType==='Bug'?'insight-warn':''}">${esc(s.ticketType)}</span>
+                            </div>
+                        </div>
+                    `).join("")}
+                </div>`;
+            }).join("");
+        } else {
+            list.innerHTML=data.map(s=>{
+                const selected=s.components.filter(c=>c.included).length;
+                const bugTag = (s.ticketType === "Bug" && s.relatedTo) ? `<span class="badge badge-purple">Fixes ${esc(s.relatedTo)}</span>` : "";
+                
+                // Get AI Insights
+                const insights = getSmartInsights(s.id, s.components);
+                let insightHTML = "";
+                if(insights.conflicts.length > 0) insightHTML += `<div class="insight-item insight-err">⚠️ CONFLICT: ${insights.conflicts.join(' | ')}</div>`;
+                if(insights.warnings.length > 0) insightHTML += `<div class="insight-item insight-warn">💡 Warning: ${insights.warnings.join(' | ')}</div>`;
+                if(insights.checklist.length > 0) insightHTML += `<div class="insight-item insight-chk">✓ QA Checklist: ${insights.checklist.join(' | ')}</div>`;
+                if(insightHTML) insightHTML = `<div class="info insights-box"><h4>AI Deployment Insights</h4>${insightHTML}</div>`;
+
+                return `<article class="story card" id="story-${esc(s.id)}"><div class="story-main"><div><div class="badges"><span class="badge badge-purple">${esc(s.project||"General")}</span><span class="badge badge-blue">${esc(s.ticketType)} · ${esc(s.storyId)}</span>${bugTag}</div><h3>${esc(s.title)}</h3><div class="meta">${esc(s.developer)} · ${esc(s.environment)}</div></div><div><span class="status ${statusClass(s.devStatus)}">${esc(s.devStatus)}</span><div class="meta" style="margin-top:8px">Testing: <b>${esc(s.testStatus)}</b></div></div><div class="count-row"><div class="count"><strong>${s.components.length}</strong><small>components</small></div><div class="count"><strong style="color:var(--success)">${selected}</strong><small>selected</small></div></div><div class="story-actions"><button class="btn btn-outline btn-icon" title="Duplicate" onclick="duplicateStory('${s.id}')">⧉</button><button class="btn btn-outline btn-icon" title="Edit" onclick="openStoryModal('${s.id}')">✎</button><button class="btn btn-outline btn-icon" title="Delete" onclick="deleteStory('${s.id}')">🗑</button><button class="btn btn-outline btn-icon" title="Export Word Document" onclick="exportStoryDoc('${s.id}')">📄</button><button class="btn btn-outline btn-icon" onclick="toggleStory('${s.id}')">⌄</button></div></div><div class="story-detail">
+                    ${insightHTML}
+                    <div class="info-grid"><div class="info"><b>Description</b><span>${esc(s.description||"Not recorded")}</span></div><div class="info"><b>Dependencies</b><span>${esc(s.dependencies||"Not recorded")}</span></div></div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Metadata type</th><th>API name</th><th>Change</th><th>Notes</th><th>Deploy</th></tr></thead><tbody>${[...s.components].sort((a,b)=>a.sequence-b.sequence).map(c=>`<tr><td><b>${esc(c.sequence)}</b></td><td>${esc(c.type)}</td><td><code>${esc(c.apiName)}</code></td><td>${esc(c.change)}</td><td>${esc(c.notes||"—")}</td><td><button class="toggle ${c.included?"included":"excluded"}" onclick="toggleInclude('${s.id}','${c.id}')">${c.included?"Included":"Excluded"}</button></td></tr>`).join("")}</tbody></table></div></div></article>`
+            }).join("");
+        }
     }
     
     function clearFilters(){
@@ -441,12 +551,14 @@
         editingId=id;
         const s=id?JSON.parse(JSON.stringify(stories.find(x=>x.id===id))):emptyStory();
         document.getElementById("modalTitle").textContent=id?"Edit development story":"Add development story";
-        ["storyId","project","storyTitle","ticketType","developer","environment","devStatus","testStatus","description","dependencies"].forEach(key=>{
+        ["storyId","project","storyTitle","ticketType","relatedTo","developer","environment","devStatus","testStatus","description","dependencies"].forEach(key=>{
             const map={storyTitle:"title"};
             document.getElementById(key).value=s[map[key]||key]||"";
         });
         document.getElementById("componentList").innerHTML="";
         s.components.forEach(addComponentRow);
+        
+        toggleRelatedTo(); 
         document.getElementById("storyModal").classList.remove("hidden");
         document.body.style.overflow="hidden";
     }
@@ -465,6 +577,8 @@
     function saveStory(){
         const val=id=>document.getElementById(id).value.trim();
         const storyId=val("storyId").toUpperCase(),title=val("storyTitle"),project=val("project")||"General";
+        const ticketType = val("ticketType");
+        const relatedTo = ticketType === "Bug" ? val("relatedTo") : "";
         
         const components=[...document.querySelectorAll(".component-row")].map((r,i)=>({
             id:r.dataset.id||uid(),apiName:r.querySelector(".comp-api").value.trim(),type:r.querySelector(".comp-type").value,
@@ -477,7 +591,7 @@
         
         const old=stories.find(s=>s.id===editingId);
         const story={
-            id:editingId||uid(),storyId,project,title,ticketType:val("ticketType"),developer:val("developer"),
+            id:editingId||uid(),storyId,project,title,ticketType,relatedTo,developer:val("developer"),
             environment:val("environment"),devStatus:val("devStatus"),testStatus:val("testStatus"),
             description:val("description"),dependencies:val("dependencies"),
             createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString(),components
@@ -501,6 +615,7 @@
             <body style="font-family: Arial, sans-serif;">
             <h1 style="color: #032d60;">${esc(s.storyId)}: ${esc(s.title)}</h1>
             <p><b>Project:</b> ${esc(s.project || "General")} | <b>Developer:</b> ${esc(s.developer)} | <b>Environment:</b> ${esc(s.environment)}</p>
+            ${s.ticketType === "Bug" && s.relatedTo ? `<p><b>Related To (Bug Fix):</b> ${esc(s.relatedTo)}</p>` : ''}
             <hr>
             <h3 style="color: #0176d3;">Description</h3>
             <p>${esc(s.description || "No description provided.")}</p>
@@ -531,28 +646,20 @@
         toast("Word document downloaded.");
     }
 
-    // --- NEW MODAL EXCEL EXPORT LOGIC ---
+    // --- MODAL EXCEL EXPORT LOGIC ---
     function exportExcel() {
         if(!stories.length) return toast("No data to export.");
-        
         const allProjects = [...new Set(stories.map(s => s.project || "General"))].sort();
         const select = document.getElementById("exportProjectSelect");
-        
         select.innerHTML = '<option value="All">All Projects</option>' + allProjects.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join("");
-        
-        // Show the prompt modal
         document.getElementById("exportModal").classList.remove("hidden");
     }
     
     function confirmExport() {
         document.getElementById("exportModal").classList.add("hidden");
         const selectedProject = document.getElementById("exportProjectSelect").value;
-        
         let dataToExport = stories;
-        if (selectedProject !== "All") {
-            dataToExport = stories.filter(s => (s.project || "General") === selectedProject);
-        }
-        
+        if (selectedProject !== "All") dataToExport = stories.filter(s => (s.project || "General") === selectedProject);
         if(!dataToExport.length) return toast("No data to export for this project.");
 
         let merges = [];
@@ -561,10 +668,7 @@
         const rows = dataToExport.flatMap(s => {
           const compCount = s.components.length;
           if (compCount > 1) {
-            // Merge Story ID, Project, and Title columns
-            merges.push({ s: { r: currentRow, c: 0 }, e: { r: currentRow + compCount - 1, c: 0 } });
-            merges.push({ s: { r: currentRow, c: 1 }, e: { r: currentRow + compCount - 1, c: 1 } });
-            merges.push({ s: { r: currentRow, c: 2 }, e: { r: currentRow + compCount - 1, c: 2 } });
+            for (let c = 0; c <= 4; c++) { merges.push({ s: { r: currentRow, c: c }, e: { r: currentRow + compCount - 1, c: c } }); }
           }
           currentRow += compCount;
 
@@ -573,6 +677,7 @@
             "Project": s.project || "General",
             "Story Title": s.title,
             "Ticket Type": s.ticketType,
+            "Related To": s.ticketType === "Bug" ? s.relatedTo : "",
             "Environment": s.environment,
             "Developer": s.developer,
             "Development Status": s.devStatus,
@@ -582,17 +687,16 @@
             "Component API Name": c.apiName,
             "Change Type": c.change,
             "Component Notes": c.notes,
-            "Dependencies": s.dependencies // STRICTLY AT THE VERY END
+            "Dependencies": s.dependencies 
           }));
         });
 
         const ws = XLSX.utils.json_to_sheet(rows);
         if(merges.length > 0) ws["!merges"] = merges;
-        ws["!cols"] = [14, 18, 28, 13, 12, 18, 22, 18, 35, 24, 38, 14, 35, 30].map(wch => ({ wch }));
+        ws["!cols"] = [14, 18, 28, 13, 15, 12, 18, 22, 18, 35, 24, 38, 14, 35, 30].map(wch => ({ wch }));
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Development Register");
         
-        // Dynamic file name based on project
         const fileName = selectedProject === "All" 
             ? `Salesforce_Tracker_${new Date().toISOString().slice(0,10)}.xlsx`
             : `Salesforce_Tracker_${selectedProject.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
@@ -601,7 +705,7 @@
         toast(`Excel workbook downloaded (${selectedProject}).`);
     }
 
-    function importExcel(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const wb=XLSX.read(ev.target.result,{type:"array"}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""}),groups={};rows.forEach(x=>{const sid=String(x["Story ID"]||"").trim().toUpperCase(),api=String(x["Component API Name"]||"").trim();if(!sid||!api)return;if(!groups[sid])groups[sid]={...emptyStory(),storyId:sid,project:String(x.Project||"General"),title:String(x["Story Title"]||sid),ticketType:String(x["Ticket Type"]||"Story"),environment:String(x.Environment||"Dev"),developer:String(x.Developer||"Prakash Jha"),devStatus:String(x["Development Status"]||"In Development"),testStatus:String(x["Testing Status"]||"Not Started"),description:String(x.Description||""),dependencies:String(x.Dependencies||""),components:[]};groups[sid].components.push({...emptyComponent(),apiName:api,type:TYPES.includes(String(x["Metadata Type"]))?String(x["Metadata Type"]):"Other",change:String(x["Change Type"]||"Updated"),included:true,sequence:groups[sid].components.length+1,notes:String(x["Component Notes"]||"")})});const incoming=Object.values(groups);if(!incoming.length)throw Error();const ids=new Set(incoming.map(x=>x.storyId));stories=[...incoming,...stories.filter(x=>!ids.has(x.storyId))];persist();render();toast(`${incoming.length} stories imported. Matching Story IDs were replaced.`)}catch(err){toast("Import failed. Use an Excel file exported from this app.")}e.target.value=""};r.readAsArrayBuffer(file)}
+    function importExcel(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const wb=XLSX.read(ev.target.result,{type:"array"}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""}),groups={};rows.forEach(x=>{const sid=String(x["Story ID"]||"").trim().toUpperCase(),api=String(x["Component API Name"]||"").trim();if(!sid||!api)return;if(!groups[sid])groups[sid]={...emptyStory(),storyId:sid,project:String(x.Project||"General"),title:String(x["Story Title"]||sid),ticketType:String(x["Ticket Type"]||"Story"),relatedTo:String(x["Related To"]||""),environment:String(x.Environment||"Dev"),developer:String(x.Developer||"Prakash Jha"),devStatus:String(x["Development Status"]||"In Development"),testStatus:String(x["Testing Status"]||"Not Started"),description:String(x.Description||""),dependencies:String(x.Dependencies||""),components:[]};groups[sid].components.push({...emptyComponent(),apiName:api,type:TYPES.includes(String(x["Metadata Type"]))?String(x["Metadata Type"]):"Other",change:String(x["Change Type"]||"Updated"),included:true,sequence:groups[sid].components.length+1,notes:String(x["Component Notes"]||"")})});const incoming=Object.values(groups);if(!incoming.length)throw Error();const ids=new Set(incoming.map(x=>x.storyId));stories=[...incoming,...stories.filter(x=>!ids.has(x.storyId))];persist();render();toast(`${incoming.length} stories imported. Matching Story IDs were replaced.`)}catch(err){toast("Import failed. Use an Excel file exported from this app.")}e.target.value=""};r.readAsArrayBuffer(file)}
     function download(content,name,type){const url=URL.createObjectURL(new Blob([content],{type})),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500)}
     function backupJSON(){download(JSON.stringify({version:1,exportedAt:new Date().toISOString(),stories},null,2),"salesforce-tracker-backup.json","application/json");toast("JSON backup downloaded.")}
     function restoreJSON(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const data=JSON.parse(ev.target.result);if(!Array.isArray(data.stories))throw Error();stories=data.stories;persist();render();toast("Backup restored.")}catch{toast("Invalid backup file.")}e.target.value=""};r.readAsText(file)}
